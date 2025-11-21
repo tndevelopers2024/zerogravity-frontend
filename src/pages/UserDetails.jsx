@@ -29,8 +29,8 @@ const ActivityItem = ({ action, timestamp, status }) => (
         className="flex items-start gap-4 pb-4 last:pb-0"
     >
         <div className={`p-2 rounded-lg ${status === 'approved' ? 'bg-green-500/10 text-green-400' :
-                status === 'rejected' ? 'bg-red-500/10 text-red-400' :
-                    'bg-blue-500/10 text-blue-400'
+            status === 'rejected' ? 'bg-red-500/10 text-red-400' :
+                'bg-blue-500/10 text-blue-400'
             }`}>
             {status === 'approved' ? <CheckCircle className="w-4 h-4" /> :
                 status === 'rejected' ? <XCircle className="w-4 h-4" /> :
@@ -60,7 +60,7 @@ const UserDetails = () => {
 
     const fetchUserDetails = async () => {
         try {
-            const response = await fetch(`http://localhost:5007/api/users/${userId}`);
+            const response = await fetch(`https://zerogravity-backend.vercel.app/api/users/${userId}`);
             if (response.ok) {
                 const data = await response.json();
                 setUser(data);
@@ -77,7 +77,7 @@ const UserDetails = () => {
 
     const handleVerify = async (action) => {
         try {
-            const response = await fetch('http://localhost:5007/api/verify', {
+            const response = await fetch('https://zerogravity-backend.vercel.app/api/verify', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userId, action })
@@ -93,7 +93,7 @@ const UserDetails = () => {
     const handleDelete = async () => {
         if (window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
             try {
-                const response = await fetch(`http://localhost:5007/api/users/${userId}`, {
+                const response = await fetch(`https://zerogravity-backend.vercel.app/api/users/${userId}`, {
                     method: 'DELETE'
                 });
                 if (response.ok) {

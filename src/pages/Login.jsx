@@ -16,7 +16,7 @@ const Login = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await fetch('http://localhost:5007/api/login', {
+            const response = await fetch('https://zerogravity-backend.vercel.app/api/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -61,8 +61,8 @@ const Login = () => {
                 {message && (
                     <div
                         className={`p-4 mb-8 rounded-lg text-sm font-medium text-center transition-all duration-300 ${message.includes('successful')
-                                ? 'bg-green-500/10 text-green-400 border border-green-500/20'
-                                : 'bg-red-500/10 text-red-400 border border-red-500/20'
+                            ? 'bg-green-500/10 text-green-400 border border-green-500/20'
+                            : 'bg-red-500/10 text-red-400 border border-red-500/20'
                             }`}
                     >
                         {message}

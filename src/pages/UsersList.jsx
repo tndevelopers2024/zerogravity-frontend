@@ -15,7 +15,7 @@ const UsersList = () => {
 
     const fetchUsers = async () => {
         try {
-            const response = await fetch('http://localhost:5007/api/users');
+            const response = await fetch('https://zerogravity-backend.vercel.app/api/users');
             const data = await response.json();
             setUsers(data);
         } catch (error) {
@@ -46,7 +46,7 @@ const UsersList = () => {
 
     const handleVerify = async (userId, action) => {
         try {
-            const response = await fetch('http://localhost:5007/api/verify', {
+            const response = await fetch('https://zerogravity-backend.vercel.app/api/verify', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userId, action })
@@ -99,7 +99,7 @@ const UsersList = () => {
     return (
         <DashboardLayout title="Users Management">
             {/* Stats Grid */}
-        
+
             {/* Filters & Actions */}
             <div className="flex flex-col gap-4 mb-6">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">

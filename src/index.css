@@ -2,6 +2,8 @@
 
 @theme {
 
+  --font-body: 'Inter', 'Outfit', system-ui, -apple-system, sans-serif;
+  --font-heading: 'Outfit', 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
 
   --color-zg-bg: #0a0a0a;
   --color-zg-surface: #121212;
@@ -35,7 +37,7 @@
 @layer components {
 
   /* Custom Container */
- 
+
 
   /* Components */
   .btn {
@@ -43,7 +45,7 @@
   }
 
   .btn-primary {
-    @apply bg-zg-accent text-black hover:bg-zg-accent-hover shadow-glow hover:shadow-[0_0_30px_rgba(212, 175, 55, 0.3)] hover:-translate-y-0.5;
+    @apply bg-zg-accent text-black hover:bg-zg-accent-hover shadow-glow hover:-translate-y-0.5;
   }
 
   .input-group {
@@ -55,7 +57,7 @@
   }
 
   .input-group input {
-    @apply w-full px-5 py-4 bg-zg-surface border border-white/10 rounded-lg text-white  focus:outline-none focus:border-zg-accent/50 focus:ring-1 focus:ring-zg-accent/50 transition-all placeholder-white/20;
+    @apply w-full px-5 py-4 bg-zg-surface border border-white/10 rounded-lg text-white focus:outline-none focus:border-zg-accent/50 focus:ring-1 focus:ring-zg-accent/50 transition-all placeholder-white/20;
   }
 
   .card {
