@@ -4,7 +4,7 @@ import Header from '../admin/Header';
 
 const DashboardLayout = ({ children, title = "Dashboard" }) => {
     return (
-        <div className="flex min-h-screen bg-zg-bg text-white font-body selection:bg-zg-accent selection:text-black">
+        <div className="flex min-h-screen bg-zg-bg text-zg-primary font-body selection:bg-zg-accent selection:text-black">
             <Sidebar />
             <div className="flex-1 flex flex-col min-w-0 relative">
                 {/* Background Elements */}

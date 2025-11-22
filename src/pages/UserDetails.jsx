@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import DashboardLayout from '../components/layouts/DashboardLayout';
+import ConfirmationModal from '../components/common/ConfirmationModal';
 import {
     ArrowLeft, Mail, Phone, Building2, FileText, MapPin, Calendar,
     CheckCircle, XCircle, Clock, Edit, Trash2, Shield, Activity,
@@ -9,14 +10,14 @@ import {
 import { motion } from 'framer-motion';
 
 const InfoCard = ({ icon: Icon, label, value, iconColor = "text-zg-accent" }) => (
-    <div className="bg-zg-surface/30 border border-white/5 rounded-xl p-4 hover:border-white/10 transition-all">
+    <div className="bg-zg-surface/30 border border-zg-secondary/10 rounded-xl p-4 hover:border-zg-secondary/20 transition-all">
         <div className="flex items-start gap-3">
-            <div className={`p-2 rounded-lg bg-white/5 ${iconColor}`}>
+            <div className={`p-2 rounded-lg bg-zg-secondary/10 ${iconColor}`}>
                 <Icon className="w-4 h-4" />
             </div>
             <div className="flex-1 min-w-0">
                 <p className="text-xs text-zg-secondary uppercase tracking-wider mb-1">{label}</p>
-                <p className="text-sm text-white font-medium break-words">{value || 'N/A'}</p>
+                <p className="text-sm text-zg-primary font-medium break-words">{value || 'N/A'}</p>
             </div>
         </div>
     </div>
@@ -37,17 +38,18 @@ const ActivityItem = ({ action, timestamp, status }) => (
                     <Activity className="w-4 h-4" />}
         </div>
         <div className="flex-1">
-            <p className="text-sm text-white font-medium">{action}</p>
+            <p className="text-sm text-zg-primary font-medium">{action}</p>
             <p className="text-xs text-zg-secondary mt-0.5">{timestamp}</p>
         </div>
     </motion.div>
 );
 
 const UserDetails = () => {
-    const { userId } = useParams();
+    const { id } = useParams();
     const navigate = useNavigate();
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [confirmModal, setConfirmModal] = useState({ isOpen: false, action: null });
 
     useEffect(() => {
         const currentUser = JSON.parse(localStorage.getItem('user'));
@@ -56,11 +58,11 @@ const UserDetails = () => {
             return;
         }
         fetchUserDetails();
-    }, [userId, navigate]);
+    }, [id, navigate]);
 
     const fetchUserDetails = async () => {
         try {
-            const response = await fetch(`https://zerogravity-backend.vercel.app/api/users/${userId}`);
+            const response = await fetch(`https://zerogravity-backend.vercel.app/api/users/${id}`);
             if (response.ok) {
                 const data = await response.json();
                 setUser(data);
@@ -75,12 +77,16 @@ const UserDetails = () => {
         }
     };
 
+    const openConfirmModal = (action) => {
+        setConfirmModal({ isOpen: true, action });
+    };
+
     const handleVerify = async (action) => {
         try {
             const response = await fetch('https://zerogravity-backend.vercel.app/api/verify', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId, action })
+                body: JSON.stringify({ userId: id, action })
             });
             if (response.ok) {
                 fetchUserDetails();
@@ -93,7 +99,7 @@ const UserDetails = () => {
     const handleDelete = async () => {
         if (window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
             try {
-                const response = await fetch(`https://zerogravity-backend.vercel.app/api/users/${userId}`, {
+                const response = await fetch(`https://zerogravity-backend.vercel.app/api/users/${id}`, {
                     method: 'DELETE'
                 });
                 if (response.ok) {
@@ -139,7 +145,7 @@ const UserDetails = () => {
             {/* Back Button */}
             <button
                 onClick={() => navigate('/admin/users')}
-                className="flex items-center gap-2 text-zg-secondary hover:text-white transition-colors mb-6 group"
+                className="flex items-center gap-2 text-zg-secondary hover:text-zg-primary transition-colors mb-6 group"
             >
                 <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
                 <span className="text-sm font-medium">Back to Users</span>
@@ -152,13 +158,17 @@ const UserDetails = () => {
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
-                        className="bg-zg-surface/50 backdrop-blur-xl border border-white/5 rounded-2xl overflow-hidden"
+                        className="bg-zg-surface/50 backdrop-blur-xl border border-zg-secondary/10 rounded-2xl overflow-hidden"
                     >
                         {/* Cover */}
                         <div className="relative h-32 bg-gradient-to-br from-zg-accent/20 via-purple-500/10 to-blue-500/10">
                             <div className="absolute -bottom-12 left-8">
-                                <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-zg-accent/30 to-purple-500/30 flex items-center justify-center text-white font-bold text-3xl border-4 border-zg-surface backdrop-blur-xl">
-                                    {user.name.charAt(0)}
+                                <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-zg-accent/30 to-purple-500/30 flex items-center justify-center text-zg-primary font-bold text-3xl border-4 border-zg-surface backdrop-blur-xl overflow-hidden">
+                                    {user.logo ? (
+                                        <img src={user.logo} alt={user.businessName} className="w-full h-full object-cover" />
+                                    ) : (
+                                        user.name.charAt(0)
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -167,7 +177,7 @@ const UserDetails = () => {
                         <div className="pt-16 px-8 pb-6">
                             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
                                 <div>
-                                    <h2 className="text-2xl font-heading font-bold text-white mb-2">{user.name}</h2>
+                                    <h2 className="text-2xl font-heading font-bold text-zg-primary mb-2">{user.name}</h2>
                                     <div className="flex flex-wrap items-center gap-3">
                                         <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold tracking-wide uppercase border
                                             ${user.status === 'approved' ? 'bg-green-500/10 text-green-400 border-green-500/20' :
@@ -191,14 +201,14 @@ const UserDetails = () => {
                                     {user.status === 'pending' && (
                                         <>
                                             <button
-                                                onClick={() => handleVerify('approve')}
+                                                onClick={() => openConfirmModal('approve')}
                                                 className="flex items-center gap-2 px-4 py-2 bg-green-500/10 hover:bg-green-500/20 text-green-400 rounded-lg transition-all border border-green-500/20 font-medium text-sm"
                                             >
                                                 <CheckCircle className="w-4 h-4" />
                                                 Approve
                                             </button>
                                             <button
-                                                onClick={() => handleVerify('reject')}
+                                                onClick={() => openConfirmModal('reject')}
                                                 className="flex items-center gap-2 px-4 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg transition-all border border-red-500/20 font-medium text-sm"
                                             >
                                                 <XCircle className="w-4 h-4" />
@@ -206,7 +216,7 @@ const UserDetails = () => {
                                             </button>
                                         </>
                                     )}
-                                    <button className="p-2 bg-white/5 hover:bg-white/10 text-zg-secondary hover:text-white rounded-lg transition-all border border-white/5">
+                                    <button className="p-2 bg-zg-secondary/10 hover:bg-zg-secondary/20 text-zg-secondary hover:text-zg-primary rounded-lg transition-all border border-zg-secondary/10">
                                         <Edit className="w-4 h-4" />
                                     </button>
                                     <button
@@ -225,9 +235,9 @@ const UserDetails = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.1 }}
-                        className="bg-zg-surface/50 backdrop-blur-xl border border-white/5 rounded-2xl p-6"
+                        className="bg-zg-surface/50 backdrop-blur-xl border border-zg-secondary/10 rounded-2xl p-6"
                     >
-                        <h3 className="text-lg font-heading font-bold text-white mb-4 flex items-center gap-2">
+                        <h3 className="text-lg font-heading font-bold text-zg-primary mb-4 flex items-center gap-2">
                             <User className="w-5 h-5 text-zg-accent" />
                             Contact Information
                         </h3>
@@ -244,9 +254,9 @@ const UserDetails = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
-                        className="bg-zg-surface/50 backdrop-blur-xl border border-white/5 rounded-2xl p-6"
+                        className="bg-zg-surface/50 backdrop-blur-xl border border-zg-secondary/10 rounded-2xl p-6"
                     >
-                        <h3 className="text-lg font-heading font-bold text-white mb-4 flex items-center gap-2">
+                        <h3 className="text-lg font-heading font-bold text-zg-primary mb-4 flex items-center gap-2">
                             <Building2 className="w-5 h-5 text-zg-accent" />
                             Business Information
                         </h3>
@@ -266,24 +276,24 @@ const UserDetails = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.3 }}
-                        className="bg-zg-surface/50 backdrop-blur-xl border border-white/5 rounded-2xl p-6"
+                        className="bg-zg-surface/50 backdrop-blur-xl border border-zg-secondary/10 rounded-2xl p-6"
                     >
-                        <h3 className="text-lg font-heading font-bold text-white mb-4 flex items-center gap-2">
+                        <h3 className="text-lg font-heading font-bold text-zg-primary mb-4 flex items-center gap-2">
                             <Activity className="w-5 h-5 text-zg-accent" />
                             Quick Stats
                         </h3>
                         <div className="space-y-4">
-                            <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                            <div className="flex items-center justify-between p-3 bg-zg-secondary/10 rounded-lg">
                                 <span className="text-sm text-zg-secondary">Total Orders</span>
-                                <span className="text-lg font-bold text-white">0</span>
+                                <span className="text-lg font-bold text-zg-primary">0</span>
                             </div>
-                            <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                            <div className="flex items-center justify-between p-3 bg-zg-secondary/10 rounded-lg">
                                 <span className="text-sm text-zg-secondary">Total Spent</span>
                                 <span className="text-lg font-bold text-zg-accent">₹0</span>
                             </div>
-                            <div className="flex items-center justify-between p-3 bg-white/5 rounded-lg">
+                            <div className="flex items-center justify-between p-3 bg-zg-secondary/10 rounded-lg">
                                 <span className="text-sm text-zg-secondary">Last Order</span>
-                                <span className="text-sm text-white">Never</span>
+                                <span className="text-sm text-zg-primary">Never</span>
                             </div>
                         </div>
                     </motion.div>
@@ -293,9 +303,9 @@ const UserDetails = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.4 }}
-                        className="bg-zg-surface/50 backdrop-blur-xl border border-white/5 rounded-2xl p-6"
+                        className="bg-zg-surface/50 backdrop-blur-xl border border-zg-secondary/10 rounded-2xl p-6"
                     >
-                        <h3 className="text-lg font-heading font-bold text-white mb-4 flex items-center gap-2">
+                        <h3 className="text-lg font-heading font-bold text-zg-primary mb-4 flex items-center gap-2">
                             <Clock className="w-5 h-5 text-zg-accent" />
                             Activity Log
                         </h3>
@@ -316,15 +326,15 @@ const UserDetails = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.5 }}
-                        className="bg-zg-surface/50 backdrop-blur-xl border border-white/5 rounded-2xl p-6"
+                        className="bg-zg-surface/50 backdrop-blur-xl border border-zg-secondary/10 rounded-2xl p-6"
                     >
-                        <h3 className="text-lg font-heading font-bold text-white mb-4">Account Actions</h3>
+                        <h3 className="text-lg font-heading font-bold text-zg-primary mb-4">Account Actions</h3>
                         <div className="space-y-2">
-                            <button className="w-full flex items-center gap-2 px-4 py-2.5 bg-white/5 hover:bg-white/10 text-white rounded-lg transition-all text-sm font-medium">
+                            <button className="w-full flex items-center gap-2 px-4 py-2.5 bg-zg-secondary/10 hover:bg-zg-secondary/20 text-zg-primary rounded-lg transition-all text-sm font-medium">
                                 <Mail className="w-4 h-4" />
                                 Send Email
                             </button>
-                            <button className="w-full flex items-center gap-2 px-4 py-2.5 bg-white/5 hover:bg-white/10 text-white rounded-lg transition-all text-sm font-medium">
+                            <button className="w-full flex items-center gap-2 px-4 py-2.5 bg-zg-secondary/10 hover:bg-zg-secondary/20 text-zg-primary rounded-lg transition-all text-sm font-medium">
                                 <Shield className="w-4 h-4" />
                                 Reset Password
                             </button>
@@ -336,6 +346,21 @@ const UserDetails = () => {
                     </motion.div>
                 </div>
             </div>
+
+            {/* Confirmation Modal */}
+            <ConfirmationModal
+                isOpen={confirmModal.isOpen}
+                onClose={() => setConfirmModal({ isOpen: false, action: null })}
+                onConfirm={() => handleVerify(confirmModal.action)}
+                title={confirmModal.action === 'approve' ? 'Approve User' : 'Reject User'}
+                message={
+                    confirmModal.action === 'approve'
+                        ? `Are you sure you want to approve ${user?.name}? They will gain access to the system.`
+                        : `Are you sure you want to reject ${user?.name}? They will not be able to access the system.`
+                }
+                confirmText={confirmModal.action === 'approve' ? 'Approve' : 'Reject'}
+                type={confirmModal.action === 'approve' ? 'success' : 'danger'}
+            />
         </DashboardLayout>
     );
 };
