@@ -14,7 +14,8 @@ const ProductForm = () => {
         image: '',
         gallery: [],
         features: [],
-        benefits: []
+        benefits: [],
+        price: ''
     });
     const [loading, setLoading] = useState(false);
     const [uploading, setUploading] = useState(false);
@@ -28,7 +29,7 @@ const ProductForm = () => {
 
     const fetchProduct = async () => {
         try {
-            const response = await fetch(`https://zerogravity-backend.vercel.app/api/products/${id}`);
+            const response = await fetch(`http://localhost:5007/api/products/${id}`);
             const data = await response.json();
             setFormData({
                 name: data.name || '',
@@ -36,7 +37,8 @@ const ProductForm = () => {
                 image: data.image || '',
                 gallery: data.gallery || [],
                 features: data.features || [],
-                benefits: data.benefits || []
+                benefits: data.benefits || [],
+                price: data.price || ''
             });
         } catch (error) {
             console.error('Error fetching product:', error);
@@ -57,7 +59,7 @@ const ProductForm = () => {
 
         setUploading(true);
         try {
-            const response = await fetch('https://zerogravity-backend.vercel.app/api/upload', {
+            const response = await fetch('http://localhost:5007/api/upload', {
                 method: 'POST',
                 body: uploadData
             });
@@ -86,7 +88,7 @@ const ProductForm = () => {
                 const uploadData = new FormData();
                 uploadData.append('image', file);
 
-                const response = await fetch('https://zerogravity-backend.vercel.app/api/upload', {
+                const response = await fetch('http://localhost:5007/api/upload', {
                     method: 'POST',
                     body: uploadData
                 });
@@ -134,8 +136,8 @@ const ProductForm = () => {
         setLoading(true);
 
         const url = isEditMode
-            ? `https://zerogravity-backend.vercel.app/api/products/${id}`
-            : 'https://zerogravity-backend.vercel.app/api/products';
+            ? `http://localhost:5007/api/products/${id}`
+            : 'http://localhost:5007/api/products';
 
         const method = isEditMode ? 'PUT' : 'POST';
 
@@ -202,6 +204,21 @@ const ProductForm = () => {
                                     rows="4"
                                     value={formData.description}
                                     onChange={handleChange}
+                                    className="w-full px-4 py-3 rounded-lg bg-zg-surface border border-zg-secondary/10 text-zg-primary focus:outline-none focus:border-zg-accent focus:ring-1 focus:ring-zg-accent transition"
+                                />
+                            </div>
+
+                            {/* Price */}
+                            <div className="md:col-span-2">
+                                <label className="text-zg-secondary text-sm mb-2 block">Price (₹)</label>
+                                <input
+                                    type="number"
+                                    name="price"
+                                    min="0"
+                                    step="0.01"
+                                    value={formData.price}
+                                    onChange={handleChange}
+                                    placeholder="Enter product price"
                                     className="w-full px-4 py-3 rounded-lg bg-zg-surface border border-zg-secondary/10 text-zg-primary focus:outline-none focus:border-zg-accent focus:ring-1 focus:ring-zg-accent transition"
                                 />
                             </div>
@@ -275,27 +292,43 @@ const ProductForm = () => {
                             {/* Main Image */}
                             <div className="md:col-span-2">
                                 <label className="text-zg-secondary text-sm mb-2 block">Main Image</label>
-                                <div className="flex gap-4 items-start">
-                                    <div className="flex-1">
-                                        <div className="relative">
-                                            <input
-                                                type="file"
-                                                accept="image/*"
-                                                onChange={handleImageUpload}
-                                                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                                                disabled={uploading}
-                                            />
-                                            <div className="w-full px-4 py-3 rounded-lg bg-zg-surface border border-zg-secondary/10 text-zg-secondary flex items-center gap-2 hover:border-zg-accent transition-colors">
-                                                <Upload className="w-4 h-4" />
-                                                <span>{uploading ? 'Uploading...' : formData.image ? 'Change Image' : 'Upload Main Image'}</span>
+                                <div className="space-y-3">
+                                    {/* Upload Option */}
+                                    <div className="flex gap-4 items-start">
+                                        <div className="flex-1">
+                                            <div className="relative">
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    onChange={handleImageUpload}
+                                                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                                    disabled={uploading}
+                                                />
+                                                <div className="w-full px-4 py-3 rounded-lg bg-zg-surface border border-zg-secondary/10 text-zg-secondary flex items-center gap-2 hover:border-zg-accent transition-colors">
+                                                    <Upload className="w-4 h-4" />
+                                                    <span>{uploading ? 'Uploading...' : formData.image ? 'Change Image' : 'Upload Main Image'}</span>
+                                                </div>
                                             </div>
                                         </div>
+                                        {formData.image && (
+                                            <div className="w-24 h-24 rounded-lg bg-zg-surface border border-zg-secondary/10 overflow-hidden flex-shrink-0 relative group">
+                                                <img src={formData.image} alt="Main Preview" className="w-full h-full object-cover" />
+                                            </div>
+                                        )}
                                     </div>
-                                    {formData.image && (
-                                        <div className="w-24 h-24 rounded-lg bg-zg-surface border border-zg-secondary/10 overflow-hidden flex-shrink-0 relative group">
-                                            <img src={formData.image} alt="Main Preview" className="w-full h-full object-cover" />
-                                        </div>
-                                    )}
+
+                                    {/* URL Option */}
+                                    <div className="relative">
+                                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-zg-secondary text-xs">OR</div>
+                                        <input
+                                            type="url"
+                                            name="image"
+                                            value={formData.image}
+                                            onChange={handleChange}
+                                            placeholder="Paste image URL here"
+                                            className="w-full pl-12 pr-4 py-3 rounded-lg bg-zg-surface border border-zg-secondary/10 text-zg-primary focus:outline-none focus:border-zg-accent focus:ring-1 focus:ring-zg-accent transition placeholder:text-zg-secondary/30"
+                                        />
+                                    </div>
                                 </div>
                             </div>
 
@@ -303,6 +336,7 @@ const ProductForm = () => {
                             <div className="md:col-span-2">
                                 <label className="text-zg-secondary text-sm mb-2 block">Product Gallery</label>
                                 <div className="space-y-4">
+                                    {/* Upload Option */}
                                     <div className="relative">
                                         <input
                                             type="file"
@@ -317,6 +351,33 @@ const ProductForm = () => {
                                             <span className="font-medium">{galleryUploading ? 'Uploading...' : 'Click to upload gallery images'}</span>
                                             <span className="text-xs opacity-50">Supports multiple files</span>
                                         </div>
+                                    </div>
+
+                                    {/* URL Option */}
+                                    <div className="flex gap-2">
+                                        <div className="relative flex-1">
+                                            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-zg-secondary text-xs">OR</div>
+                                            <input
+                                                type="url"
+                                                id="galleryUrlInput"
+                                                placeholder="Paste image URL and click Add"
+                                                className="w-full pl-12 pr-4 py-3 rounded-lg bg-zg-surface border border-zg-secondary/10 text-zg-primary focus:outline-none focus:border-zg-accent focus:ring-1 focus:ring-zg-accent transition placeholder:text-zg-secondary/30"
+                                            />
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                const input = document.getElementById('galleryUrlInput');
+                                                const url = input.value.trim();
+                                                if (url) {
+                                                    setFormData(prev => ({ ...prev, gallery: [...prev.gallery, url] }));
+                                                    input.value = '';
+                                                }
+                                            }}
+                                            className="px-6 py-3 bg-zg-accent/10 text-zg-accent rounded-lg hover:bg-zg-accent/20 transition-colors font-medium whitespace-nowrap"
+                                        >
+                                            Add URL
+                                        </button>
                                     </div>
 
                                     {/* Gallery Grid */}

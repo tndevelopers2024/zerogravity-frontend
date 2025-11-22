@@ -16,7 +16,7 @@ const ProductsList = () => {
 
     const fetchProducts = async () => {
         try {
-            const response = await fetch('https://zerogravity-backend.vercel.app/api/products');
+            const response = await fetch('http://localhost:5007/api/products');
             const data = await response.json();
             setProducts(data);
         } catch (error) {
@@ -29,7 +29,7 @@ const ProductsList = () => {
     const handleDelete = async (id) => {
         if (window.confirm('Are you sure you want to delete this product?')) {
             try {
-                const response = await fetch(`https://zerogravity-backend.vercel.app/api/products/${id}`, {
+                const response = await fetch(`http://localhost:5007/api/products/${id}`, {
                     method: 'DELETE'
                 });
                 if (response.ok) {

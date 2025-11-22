@@ -30,7 +30,7 @@ const Register = () => {
 
         setUploading(true);
         try {
-            const response = await fetch('https://zerogravity-backend.vercel.app/api/upload', {
+            const response = await fetch('http://localhost:5007/api/upload', {
                 method: 'POST',
                 body: uploadData
             });
@@ -56,7 +56,7 @@ const Register = () => {
         }
 
         try {
-            const response = await fetch('https://zerogravity-backend.vercel.app/api/register', {
+            const response = await fetch('http://localhost:5007/api/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(formData),
@@ -173,28 +173,44 @@ const Register = () => {
                     {/* Company Logo */}
                     <div className="md:col-span-2">
                         <label className="text-zg-secondary text-sm mb-2 block">Company Logo</label>
-                        <div className="flex gap-4 items-start">
-                            <div className="flex-1">
-                                <div className="relative">
-                                    <input
-                                        type="file"
-                                        accept="image/*"
-                                        onChange={handleLogoUpload}
-                                        className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
-                                        disabled={uploading}
-                                    />
-                                    <div className="w-full px-4 py-3 rounded-lg bg-zinc-900 border border-zinc-700 text-zg-secondary flex items-center gap-2 hover:border-zg-accent transition-colors">
-                                        <Upload className="w-4 h-4" />
-                                        <span>{uploading ? 'Uploading...' : formData.logo ? 'Logo Uploaded' : 'Upload Logo'}</span>
+                        <div className="space-y-3">
+                            {/* Upload Option */}
+                            <div className="flex gap-4 items-start">
+                                <div className="flex-1">
+                                    <div className="relative">
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={handleLogoUpload}
+                                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                                            disabled={uploading}
+                                        />
+                                        <div className="w-full px-4 py-3 rounded-lg bg-zinc-900 border border-zinc-700 text-zg-secondary flex items-center gap-2 hover:border-zg-accent transition-colors">
+                                            <Upload className="w-4 h-4" />
+                                            <span>{uploading ? 'Uploading...' : formData.logo ? 'Logo Uploaded' : 'Upload Logo'}</span>
+                                        </div>
                                     </div>
+                                    <p className="text-xs text-zg-secondary mt-1">Recommended size: 200x200px. Max 2MB.</p>
                                 </div>
-                                <p className="text-xs text-zg-secondary mt-1">Recommended size: 200x200px. Max 2MB.</p>
+                                {formData.logo && (
+                                    <div className="w-12 h-12 rounded-lg bg-zinc-900 border border-zinc-700 overflow-hidden flex-shrink-0">
+                                        <img src={formData.logo} alt="Logo Preview" className="w-full h-full object-cover" />
+                                    </div>
+                                )}
                             </div>
-                            {formData.logo && (
-                                <div className="w-12 h-12 rounded-lg bg-zinc-900 border border-zinc-700 overflow-hidden flex-shrink-0">
-                                    <img src={formData.logo} alt="Logo Preview" className="w-full h-full object-cover" />
-                                </div>
-                            )}
+
+                            {/* URL Option */}
+                            <div className="relative">
+                                <div className="absolute left-3 top-1/2 -translate-y-1/2 text-zg-secondary text-xs">OR</div>
+                                <input
+                                    type="url"
+                                    name="logo"
+                                    value={formData.logo}
+                                    onChange={handleChange}
+                                    placeholder="Paste logo URL here"
+                                    className="w-full pl-12 pr-4 py-3 rounded-lg bg-zg-bg border border-zg-secondary/10 text-zg-primary focus:outline-none focus:border-zg-accent focus:ring-1 focus:ring-zg-accent transition placeholder:text-zg-secondary/30"
+                                />
+                            </div>
                         </div>
                     </div>
 

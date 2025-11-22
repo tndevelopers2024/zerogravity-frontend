@@ -25,7 +25,16 @@ const OrderForm = () => {
         replicaEbook: false,
         imageLink: '',
         quantity: 1,
-        logo: ''
+        logo: '',
+        deliveryAddress: {
+            name: '',
+            phone: '',
+            address: '',
+            city: '',
+            state: '',
+            pincode: '',
+            country: 'India'
+        }
     });
 
     useEffect(() => {
@@ -34,7 +43,7 @@ const OrderForm = () => {
 
     const fetchProduct = async () => {
         try {
-            const response = await fetch(`https://zerogravity-backend.vercel.app/api/products/${productId}`);
+            const response = await fetch(`http://localhost:5007/api/products/${productId}`);
             const data = await response.json();
             setProduct(data);
         } catch (error) {
@@ -59,6 +68,17 @@ const OrderForm = () => {
         }));
     };
 
+    const handleAddressChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            deliveryAddress: {
+                ...prev.deliveryAddress,
+                [name]: value
+            }
+        }));
+    };
+
     const handleLogoUpload = async (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -68,7 +88,7 @@ const OrderForm = () => {
 
         setUploading(true);
         try {
-            const response = await fetch('https://zerogravity-backend.vercel.app/api/upload', {
+            const response = await fetch('http://localhost:5007/api/upload', {
                 method: 'POST',
                 body: uploadData
             });
@@ -104,7 +124,7 @@ const OrderForm = () => {
                 productId
             };
 
-            const response = await fetch('https://zerogravity-backend.vercel.app/api/orders', {
+            const response = await fetch('http://localhost:5007/api/orders', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(orderData)
@@ -444,6 +464,113 @@ const OrderForm = () => {
                                             </button>
                                         </div>
                                     )}
+                                </div>
+                            </div>
+
+                            {/* Delivery Address Section */}
+                            <div className="pt-8 border-t border-zg-secondary/10">
+                                <h3 className="text-xl font-heading font-bold mb-6">Delivery Address</h3>
+
+                                <div className="space-y-6">
+                                    {/* Name */}
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-zg-secondary">Full Name</label>
+                                        <input
+                                            type="text"
+                                            name="name"
+                                            required
+                                            value={formData.deliveryAddress.name}
+                                            onChange={handleAddressChange}
+                                            placeholder="Enter your full name"
+                                            className="w-full px-4 py-3 rounded-lg bg-zg-bg border border-zg-secondary/10 text-zg-primary focus:outline-none focus:border-zg-accent focus:ring-1 focus:ring-zg-accent transition-all placeholder:text-zg-secondary/30"
+                                        />
+                                    </div>
+
+                                    {/* Phone */}
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-zg-secondary">Phone Number</label>
+                                        <input
+                                            type="tel"
+                                            name="phone"
+                                            required
+                                            value={formData.deliveryAddress.phone}
+                                            onChange={handleAddressChange}
+                                            placeholder="Enter your phone number"
+                                            className="w-full px-4 py-3 rounded-lg bg-zg-bg border border-zg-secondary/10 text-zg-primary focus:outline-none focus:border-zg-accent focus:ring-1 focus:ring-zg-accent transition-all placeholder:text-zg-secondary/30"
+                                        />
+                                    </div>
+
+                                    {/* Address */}
+                                    <div className="space-y-2">
+                                        <label className="text-sm font-medium text-zg-secondary">Street Address</label>
+                                        <textarea
+                                            name="address"
+                                            required
+                                            value={formData.deliveryAddress.address}
+                                            onChange={handleAddressChange}
+                                            placeholder="Enter your complete address"
+                                            rows="3"
+                                            className="w-full px-4 py-3 rounded-lg bg-zg-bg border border-zg-secondary/10 text-zg-primary focus:outline-none focus:border-zg-accent focus:ring-1 focus:ring-zg-accent transition-all placeholder:text-zg-secondary/30 resize-none"
+                                        />
+                                    </div>
+
+                                    {/* City and State */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-medium text-zg-secondary">City</label>
+                                            <input
+                                                type="text"
+                                                name="city"
+                                                required
+                                                value={formData.deliveryAddress.city}
+                                                onChange={handleAddressChange}
+                                                placeholder="Enter city"
+                                                className="w-full px-4 py-3 rounded-lg bg-zg-bg border border-zg-secondary/10 text-zg-primary focus:outline-none focus:border-zg-accent focus:ring-1 focus:ring-zg-accent transition-all placeholder:text-zg-secondary/30"
+                                            />
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-medium text-zg-secondary">State</label>
+                                            <input
+                                                type="text"
+                                                name="state"
+                                                required
+                                                value={formData.deliveryAddress.state}
+                                                onChange={handleAddressChange}
+                                                placeholder="Enter state"
+                                                className="w-full px-4 py-3 rounded-lg bg-zg-bg border border-zg-secondary/10 text-zg-primary focus:outline-none focus:border-zg-accent focus:ring-1 focus:ring-zg-accent transition-all placeholder:text-zg-secondary/30"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    {/* Pincode and Country */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-medium text-zg-secondary">Pincode</label>
+                                            <input
+                                                type="text"
+                                                name="pincode"
+                                                required
+                                                value={formData.deliveryAddress.pincode}
+                                                onChange={handleAddressChange}
+                                                placeholder="Enter pincode"
+                                                className="w-full px-4 py-3 rounded-lg bg-zg-bg border border-zg-secondary/10 text-zg-primary focus:outline-none focus:border-zg-accent focus:ring-1 focus:ring-zg-accent transition-all placeholder:text-zg-secondary/30"
+                                            />
+                                        </div>
+
+                                        <div className="space-y-2">
+                                            <label className="text-sm font-medium text-zg-secondary">Country</label>
+                                            <input
+                                                type="text"
+                                                name="country"
+                                                required
+                                                value={formData.deliveryAddress.country}
+                                                onChange={handleAddressChange}
+                                                placeholder="Enter country"
+                                                className="w-full px-4 py-3 rounded-lg bg-zg-bg border border-zg-secondary/10 text-zg-primary focus:outline-none focus:border-zg-accent focus:ring-1 focus:ring-zg-accent transition-all placeholder:text-zg-secondary/30"
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
 
