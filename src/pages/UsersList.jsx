@@ -17,7 +17,7 @@ const UsersList = () => {
 
     const fetchUsers = async () => {
         try {
-            const response = await fetch('http://localhost:5007/api/users');
+            const response = await fetch('https://zerogravity-backend.vercel.app/api/users');
             const data = await response.json();
             setUsers(data);
         } catch (error) {
@@ -52,7 +52,7 @@ const UsersList = () => {
 
     const handleVerify = async (userId, action) => {
         try {
-            const response = await fetch('http://localhost:5007/api/verify', {
+            const response = await fetch('https://zerogravity-backend.vercel.app/api/verify', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userId, action })
@@ -67,7 +67,7 @@ const UsersList = () => {
 
     const handleDelete = async (userId) => {
         try {
-            const response = await fetch(`http://localhost:5007/api/users/${userId}`, {
+            const response = await fetch(`https://zerogravity-backend.vercel.app/api/users/${userId}`, {
                 method: 'DELETE'
             });
             if (response.ok) {

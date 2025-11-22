@@ -62,7 +62,7 @@ const UserDetails = () => {
 
     const fetchUserDetails = async () => {
         try {
-            const response = await fetch(`http://localhost:5007/api/users/${id}`);
+            const response = await fetch(`https://zerogravity-backend.vercel.app/api/users/${id}`);
             if (response.ok) {
                 const data = await response.json();
                 setUser(data);
@@ -83,7 +83,7 @@ const UserDetails = () => {
 
     const handleVerify = async (action) => {
         try {
-            const response = await fetch('http://localhost:5007/api/verify', {
+            const response = await fetch('https://zerogravity-backend.vercel.app/api/verify', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userId: id, action })
@@ -99,7 +99,7 @@ const UserDetails = () => {
     const handleDelete = async () => {
         if (window.confirm('Are you sure you want to delete this user? This action cannot be undone.')) {
             try {
-                const response = await fetch(`http://localhost:5007/api/users/${id}`, {
+                const response = await fetch(`https://zerogravity-backend.vercel.app/api/users/${id}`, {
                     method: 'DELETE'
                 });
                 if (response.ok) {
