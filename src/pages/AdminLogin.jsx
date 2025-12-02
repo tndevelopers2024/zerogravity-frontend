@@ -61,7 +61,7 @@ const AdminLogin = () => {
                     <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-zg-accent/10 text-zg-accent mb-4">
                         <Shield className="w-8 h-8" />
                     </div>
-                    <h1 className="text-3xl font-heading font-bold text-white mb-2">Admin Portal</h1>
+                    <h1 className="text-3xl font-heading text-black font-bold mb-2">Admin Portal</h1>
                     <p className="text-zg-secondary">Secure access for administrators</p>
                 </div>
 
@@ -85,9 +85,10 @@ const AdminLogin = () => {
                             <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-zg-secondary" />
                             <input
                                 type="text"
+
                                 value={formData.emailOrUsername}
                                 onChange={(e) => setFormData({ ...formData, emailOrUsername: e.target.value })}
-                                className="w-full bg-zg-bg border border-zg-secondary/20 rounded-xl py-3 pl-12 pr-4 text-white placeholder-zg-secondary/50 focus:outline-none focus:border-zg-accent focus:ring-1 focus:ring-zg-accent transition-all"
+                                className="w-full bg-zg-bg border border-zg-secondary/20 rounded-xl py-3 pl-12 pr-4 text-black placeholder-zg-secondary/50 focus:outline-none focus:border-zg-accent focus:ring-1 focus:ring-zg-accent transition-all"
                                 placeholder="Enter your credentials"
                                 required
                             />
@@ -104,7 +105,7 @@ const AdminLogin = () => {
                                 type="password"
                                 value={formData.password}
                                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                className="w-full bg-zg-bg border border-zg-secondary/20 rounded-xl py-3 pl-12 pr-4 text-white placeholder-zg-secondary/50 focus:outline-none focus:border-zg-accent focus:ring-1 focus:ring-zg-accent transition-all"
+                                className="w-full bg-zg-bg border border-zg-secondary/20 rounded-xl py-3 pl-12 pr-4 text-black placeholder-zg-secondary/50 focus:outline-none focus:border-zg-accent focus:ring-1 focus:ring-zg-accent transition-all"
                                 placeholder="••••••••"
                                 required
                             />

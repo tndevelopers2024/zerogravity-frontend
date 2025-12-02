@@ -392,9 +392,82 @@ const ProductForm = () => {
                     </div>
                 </div>
 
+                {/* FEATURES & BENEFITS SECTION */}
+                <div className="bg-zg-surface/50 border border-zg-secondary/10 p-6 rounded-2xl">
+                    <h3 className="text-lg font-bold mb-6 text-zg-primary">Features & Benefits</h3>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        {/* Features */}
+                        <div>
+                            <label className="text-zg-primary text-sm font-medium block mb-3">Product Features</label>
+                            <div className="space-y-3">
+                                {formData.features.map((feature, index) => (
+                                    <div key={index} className="flex items-center gap-2">
+                                        <input
+                                            type="text"
+                                            value={feature}
+                                            onChange={(e) => handleListChange('features', index, e.target.value)}
+                                            placeholder={`Feature ${index + 1}`}
+                                            className="flex-1 px-4 py-3 rounded-lg bg-zg-surface border border-zg-secondary/10 text-zg-primary focus:outline-none focus:border-zg-accent transition"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => removeListItem('features', index)}
+                                            className="p-3 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                ))}
+                                <button
+                                    type="button"
+                                    onClick={() => addListItem('features')}
+                                    className="w-full py-3 rounded-lg border-2 border-dashed border-zg-secondary/20 hover:border-zg-accent/50 text-zg-secondary hover:text-zg-accent transition flex items-center justify-center gap-2"
+                                >
+                                    <Plus className="w-4 h-4" />
+                                    Add Feature
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Benefits */}
+                        <div>
+                            <label className="text-zg-primary text-sm font-medium block mb-3">Product Benefits</label>
+                            <div className="space-y-3">
+                                {formData.benefits.map((benefit, index) => (
+                                    <div key={index} className="flex items-center gap-2">
+                                        <input
+                                            type="text"
+                                            value={benefit}
+                                            onChange={(e) => handleListChange('benefits', index, e.target.value)}
+                                            placeholder={`Benefit ${index + 1}`}
+                                            className="flex-1 px-4 py-3 rounded-lg bg-zg-surface border border-zg-secondary/10 text-zg-primary focus:outline-none focus:border-zg-accent transition"
+                                        />
+                                        <button
+                                            type="button"
+                                            onClick={() => removeListItem('benefits', index)}
+                                            className="p-3 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition"
+                                        >
+                                            <Trash2 className="w-4 h-4" />
+                                        </button>
+                                    </div>
+                                ))}
+                                <button
+                                    type="button"
+                                    onClick={() => addListItem('benefits')}
+                                    className="w-full py-3 rounded-lg border-2 border-dashed border-zg-secondary/20 hover:border-zg-accent/50 text-zg-secondary hover:text-zg-accent transition flex items-center justify-center gap-2"
+                                >
+                                    <Plus className="w-4 h-4" />
+                                    Add Benefit
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 {/* CUSTOMIZATION SECTION */}
                 <div className="bg-zg-surface/50 border border-zg-secondary/10 p-6 rounded-2xl">
-                    <h3 className="text-lg font-bold mb-4 text-white">Customization Settings</h3>
+                    <h3 className="text-lg font-bold mb-4 text-zg-primary">Customization Settings</h3>
 
                     <div className="flex items-center gap-3 mb-4">
                         <input
@@ -407,7 +480,7 @@ const ProductForm = () => {
                             }))}
                             className="w-5 h-5 rounded border-zg-secondary/20 bg-zg-surface text-zg-accent focus:ring-zg-accent"
                         />
-                        <label htmlFor="allowCustomization" className="text-white font-medium">
+                        <label htmlFor="allowCustomization" className="text-zg-primary font-medium">
                             Enable User Uploads
                         </label>
                     </div>
@@ -415,7 +488,7 @@ const ProductForm = () => {
                     {formData.customization.allowed && (
                         <div className="space-y-4 pl-8 border-l-2 border-zg-secondary/10">
                             <div>
-                                <label className="text-zg-secondary text-sm block mb-2">Max Image Count</label>
+                                <label className="text-zg-primary text-sm font-medium block mb-2">Max Image Count</label>
                                 <input
                                     type="number"
                                     value={formData.customization.imageCount}
@@ -429,7 +502,7 @@ const ProductForm = () => {
 
                             {(formData.type === "frame" || formData.type === "ealbum") && (
                                 <div>
-                                    <label className="text-white font-medium block mb-3">Cover Preview Area (%)</label>
+                                    <label className="text-zg-primary font-medium block mb-3">Cover Preview Area (%)</label>
                                     <p className="text-xs text-zg-secondary mb-3">
                                         Define the area on the cover image where the user's uploaded photo will be placed.
                                         Values are in percentages (0-100).
@@ -437,7 +510,7 @@ const ProductForm = () => {
 
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                         <div>
-                                            <label className="text-zg-secondary text-xs block mb-1">Left (X)</label>
+                                            <label className="text-zg-primary text-xs font-medium block mb-1">Left (X)</label>
                                             <input
                                                 type="number"
                                                 value={formData.customization.previewArea.x}
@@ -452,7 +525,7 @@ const ProductForm = () => {
                                             />
                                         </div>
                                         <div>
-                                            <label className="text-zg-secondary text-xs block mb-1">Top (Y)</label>
+                                            <label className="text-zg-primary text-xs font-medium block mb-1">Top (Y)</label>
                                             <input
                                                 type="number"
                                                 value={formData.customization.previewArea.y}
@@ -467,7 +540,7 @@ const ProductForm = () => {
                                             />
                                         </div>
                                         <div>
-                                            <label className="text-zg-secondary text-xs block mb-1">Width</label>
+                                            <label className="text-zg-primary text-xs font-medium block mb-1">Width</label>
                                             <input
                                                 type="number"
                                                 value={formData.customization.previewArea.width}
@@ -482,7 +555,7 @@ const ProductForm = () => {
                                             />
                                         </div>
                                         <div>
-                                            <label className="text-zg-secondary text-xs block mb-1">Height</label>
+                                            <label className="text-zg-primary text-xs font-medium block mb-1">Height</label>
                                             <input
                                                 type="number"
                                                 value={formData.customization.previewArea.height}

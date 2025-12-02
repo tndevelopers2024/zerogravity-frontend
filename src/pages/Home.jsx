@@ -252,7 +252,7 @@ const Home = () => {
             </section>
 
             {/* Categories Section */}
-            <section className="py-20 px-4 bg-zg-surface/30">
+            {/* <section className="py-20 px-4 bg-zg-surface/30">
                 <div className="max-w-7xl mx-auto">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -325,7 +325,7 @@ const Home = () => {
                         ))}
                     </div>
                 </div>
-            </section>
+            </section> */}
 
             {/* Why Choose Us */}
             <section className="py-20 px-4">

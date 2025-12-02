@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ShoppingCart, Heart, ArrowLeft, Check, Star, Upload, X, Image as ImageIcon, ChevronRight, Shield, Truck, RotateCcw, Share2, ZoomIn } from 'lucide-react';
+import { ShoppingCart, Heart, ArrowLeft, Check, Star, Upload, X, Image as ImageIcon, ChevronRight, Shield, Truck, RotateCcw, Share2, ZoomIn, Sparkles } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getProductByIdApi, addToCartApi, uploadImageApi } from '../utils/Api';
 import { useAuth } from '../context/AuthContext';
@@ -258,75 +258,75 @@ const ProductDetails = () => {
 
                                 {/* Selectors */}
                                 {product.type === 'frame' &&
-                                <div className="space-y-6 p-6 bg-zg-surface/30 rounded-2xl border border-zg-secondary/10 mb-8">
-                                    {product.type === 'frame' && product.frameSizes?.length > 0 && (
-                                        <div>
-                                            <label className="text-sm font-bold text-zg-primary mb-3 block uppercase tracking-wider">Select Size</label>
-                                            <div className="flex flex-wrap gap-3">
-                                                {product.frameSizes.map((size, index) => (
-                                                    <button
-                                                        key={index}
-                                                        onClick={() => setSelectedSize(size)}
-                                                        disabled={!size.inStock}
-                                                        className={`px-4 py-2 rounded-lg border transition-all text-sm font-medium ${selectedSize?.name === size.name
+                                    <div className="space-y-6 p-6 bg-zg-surface/30 rounded-2xl border border-zg-secondary/10 mb-8">
+                                        {product.type === 'frame' && product.frameSizes?.length > 0 && (
+                                            <div>
+                                                <label className="text-sm font-bold text-zg-primary mb-3 block uppercase tracking-wider">Select Size</label>
+                                                <div className="flex flex-wrap gap-3">
+                                                    {product.frameSizes.map((size, index) => (
+                                                        <button
+                                                            key={index}
+                                                            onClick={() => setSelectedSize(size)}
+                                                            disabled={!size.inStock}
+                                                            className={`px-4 py-2 rounded-lg border transition-all text-sm font-medium ${selectedSize?.name === size.name
                                                                 ? 'border-zg-accent bg-zg-accent text-black shadow-lg shadow-zg-accent/20'
                                                                 : 'border-zg-secondary/20 hover:border-zg-secondary/50 bg-zg-bg/50'
-                                                            } ${!size.inStock ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                                    >
-                                                        {size.name}
-                                                    </button>
-                                                ))}
+                                                                } ${!size.inStock ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                        >
+                                                            {size.name}
+                                                        </button>
+                                                    ))}
+                                                </div>
                                             </div>
-                                        </div>
-                                    )}
+                                        )}
 
-                                    {product.type === 'ealbum' && product.formats?.length > 0 && (
-                                        <div>
-                                            <label className="text-sm font-bold text-zg-primary mb-3 block uppercase tracking-wider">Select Format</label>
-                                            <div className="flex flex-wrap gap-3">
-                                                {product.formats.map((format) => (
-                                                    <button
-                                                        key={format}
-                                                        onClick={() => setSelectedFormat(format)}
-                                                        className={`px-4 py-2 rounded-lg border transition-all text-sm font-medium ${selectedFormat === format
+                                        {product.type === 'ealbum' && product.formats?.length > 0 && (
+                                            <div>
+                                                <label className="text-sm font-bold text-zg-primary mb-3 block uppercase tracking-wider">Select Format</label>
+                                                <div className="flex flex-wrap gap-3">
+                                                    {product.formats.map((format) => (
+                                                        <button
+                                                            key={format}
+                                                            onClick={() => setSelectedFormat(format)}
+                                                            className={`px-4 py-2 rounded-lg border transition-all text-sm font-medium ${selectedFormat === format
                                                                 ? 'border-zg-accent bg-zg-accent text-black shadow-lg shadow-zg-accent/20'
                                                                 : 'border-zg-secondary/20 hover:border-zg-secondary/50 bg-zg-bg/50'
-                                                            }`}
-                                                    >
-                                                        {format}
-                                                    </button>
-                                                ))}
+                                                                }`}
+                                                        >
+                                                            {format}
+                                                        </button>
+                                                    ))}
+                                                </div>
                                             </div>
-                                        </div>
-                                    )}
+                                        )}
 
-                                    {/* Quantity */}
-                                    {product.type === 'frame' && (
-                                        <div>
-                                            <label className="text-sm font-bold text-zg-primary mb-3 block uppercase tracking-wider">Quantity</label>
-                                            <div className="flex items-center gap-4 bg-zg-bg/50 inline-flex rounded-xl p-1 border border-zg-secondary/10">
-                                                <button
-                                                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                                    className="w-10 h-10 rounded-lg hover:bg-zg-surface transition-colors flex items-center justify-center"
-                                                >
-                                                    -
-                                                </button>
-                                                <span className="text-lg font-bold w-8 text-center">{quantity}</span>
-                                                <button
-                                                    onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
-                                                    className="w-10 h-10 rounded-lg hover:bg-zg-surface transition-colors flex items-center justify-center"
-                                                >
-                                                    +
-                                                </button>
+                                        {/* Quantity */}
+                                        {product.type === 'frame' && (
+                                            <div>
+                                                <label className="text-sm font-bold text-zg-primary mb-3 block uppercase tracking-wider">Quantity</label>
+                                                <div className="flex items-center gap-4 bg-zg-bg/50 inline-flex rounded-xl p-1 border border-zg-secondary/10">
+                                                    <button
+                                                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                                                        className="w-10 h-10 rounded-lg hover:bg-zg-surface transition-colors flex items-center justify-center"
+                                                    >
+                                                        -
+                                                    </button>
+                                                    <span className="text-lg font-bold w-8 text-center">{quantity}</span>
+                                                    <button
+                                                        onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
+                                                        className="w-10 h-10 rounded-lg hover:bg-zg-surface transition-colors flex items-center justify-center"
+                                                    >
+                                                        +
+                                                    </button>
+                                                </div>
                                             </div>
-                                        </div>
-                                    )}
-                                </div>
-                            }
+                                        )}
+                                    </div>
+                                }
 
                                 {/* Customization Actions */}
                                 <div className="space-y-4 mb-8">
-                                    {product.customization?.allowed && product.type === 'frame' &&(
+                                    {product.customization?.allowed && product.type === 'frame' && (
                                         <div className="bg-zg-surface/30 border border-zg-secondary/10 rounded-xl p-5">
                                             <div className="flex items-center justify-between mb-4">
                                                 <h3 className="font-bold flex items-center gap-2">
@@ -427,7 +427,7 @@ const ProductDetails = () => {
                     {/* Tabs Section */}
                     <div className="mt-20">
                         <div className="flex items-center gap-8 border-b border-zg-secondary/10 mb-8 overflow-x-auto">
-                            {['description', 'features', 'specifications'].map((tab) => (
+                            {['description', 'features', 'benefits', 'specifications'].map((tab) => (
                                 <button
                                     key={tab}
                                     onClick={() => setActiveTab(tab)}
@@ -478,6 +478,33 @@ const ProductDetails = () => {
                                                 </div>
                                             </div>
                                         ))}
+                                    </motion.div>
+                                )}
+                                {activeTab === 'benefits' && (
+                                    <motion.div
+                                        key="benefits"
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -10 }}
+                                        className="grid grid-cols-1 md:grid-cols-2 gap-6"
+                                    >
+                                        {product.benefits && product.benefits.length > 0 ? (
+                                            product.benefits.map((benefit, idx) => (
+                                                <div key={idx} className="flex items-start gap-4 p-4 bg-zg-surface/30 rounded-xl border border-zg-secondary/10">
+                                                    <div className="p-2 bg-zg-accent/10 rounded-lg text-zg-accent">
+                                                        <Sparkles className="w-5 h-5" />
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="font-bold mb-1">Benefit {idx + 1}</h4>
+                                                        <p className="text-sm text-zg-secondary">{benefit}</p>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className="col-span-2 text-center py-8 text-zg-secondary">
+                                                No benefits listed for this product.
+                                            </div>
+                                        )}
                                     </motion.div>
                                 )}
                                 {activeTab === 'specifications' && (

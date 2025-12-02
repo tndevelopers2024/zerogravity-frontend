@@ -7,7 +7,7 @@ import { uploadImageApi } from '../utils/Api';
 const EAlbumCustomizer = ({ product, onSave, onClose }) => {
     const [showPreview, setShowPreview] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
-    const [isGridView, setIsGridView] = useState(false);
+    const [isGridView, setIsGridView] = useState(true);
     const flipBookRef = useRef();
     const totalPages = product.pageCount || 20;
 
@@ -27,6 +27,7 @@ const EAlbumCustomizer = ({ product, onSave, onClose }) => {
     });
 
     const [uploading, setUploading] = useState(false);
+    const [uploadProgress, setUploadProgress] = useState({ current: 0, total: 0 });
     const [dragActive, setDragActive] = useState(false);
     const [draggedImage, setDraggedImage] = useState(null);
 
@@ -62,13 +63,16 @@ const EAlbumCustomizer = ({ product, onSave, onClose }) => {
         if (files.length === 0) return;
 
         setUploading(true);
+        setUploadProgress({ current: 0, total: files.length });
         try {
             const uploadedUrls = [];
-            for (const file of files) {
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
                 const formData = new FormData();
                 formData.append('image', file);
                 const res = await uploadImageApi(formData);
                 uploadedUrls.push(res.data.url);
+                setUploadProgress({ current: i + 1, total: files.length });
             }
 
             // Distribute images across pages
@@ -105,6 +109,7 @@ const EAlbumCustomizer = ({ product, onSave, onClose }) => {
             alert('Failed to upload images');
         } finally {
             setUploading(false);
+            setUploadProgress({ current: 0, total: 0 });
         }
     };
 
@@ -156,13 +161,16 @@ const EAlbumCustomizer = ({ product, onSave, onClose }) => {
         const files = Array.from(e.dataTransfer.files).filter(file => file.type.startsWith('image/'));
         if (files.length > 0) {
             setUploading(true);
+            setUploadProgress({ current: 0, total: files.length });
             try {
                 const uploadedUrls = [];
-                for (const file of files) {
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
                     const formData = new FormData();
                     formData.append('image', file);
                     const res = await uploadImageApi(formData);
                     uploadedUrls.push(res.data.url);
+                    setUploadProgress({ current: i + 1, total: files.length });
                 }
 
                 setCustomization(prev => ({
@@ -177,6 +185,7 @@ const EAlbumCustomizer = ({ product, onSave, onClose }) => {
                 console.error('Upload error:', error);
             } finally {
                 setUploading(false);
+                setUploadProgress({ current: 0, total: 0 });
             }
         }
     };
@@ -361,7 +370,7 @@ const EAlbumCustomizer = ({ product, onSave, onClose }) => {
                             <div className="flex items-center gap-3">
                                 <label className="flex items-center gap-2 px-6 py-3 bg-white text-zg-accent font-bold rounded-xl hover:bg-white/90 transition cursor-pointer shadow-lg">
                                     <Upload className="w-5 h-5" />
-                                    {uploading ? 'Uploading...' : 'Bulk Upload Photos'}
+                                    {uploading ? `Uploading ${uploadProgress.current}/${uploadProgress.total}` : 'Bulk Upload Photos'}
                                     <input
                                         type="file"
                                         accept="image/*"
