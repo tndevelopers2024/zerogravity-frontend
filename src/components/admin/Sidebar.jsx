@@ -21,7 +21,7 @@ const Sidebar = () => {
         { name: 'Users', path: '/admin/users', icon: Users },
         { name: 'Orders', path: '/admin/orders', icon: ShoppingBag },
         { name: 'Products', path: '/admin/products', icon: Package },
-        { name: 'Reports', path: '/admin/reports', icon: FileBarChart },
+        { name: 'Categories', path: '/admin/categories', icon: FileBarChart },  
         { name: 'Settings', path: '/admin/settings', icon: Settings },
     ];
 
@@ -36,8 +36,9 @@ const Sidebar = () => {
         <aside className="w-72 bg-zg-surface/80 backdrop-blur-md border-r border-zg-secondary/10 flex flex-col h-screen sticky top-0 z-30">
             <div className="p-8">
                 <Link to="/" className="block">
-                    <h1 className="text-3xl font-heading font-bold bg-white text-white tracking-tighter p-3 rounded-xl">
-                        <img src="/logo1.png" alt="logo" />
+                    <h1 className="text-3xl grid place-items-center text-center font-heading font-bold bg-white text-white tracking-tighter p-3 rounded-xl">
+                        <img src="/logo.png" alt="logo" />
+                        <span className="text-xs text-black font-bold uppercase tracking-widest">ZeroGravity</span>
                     </h1>
                 </Link>
             </div>

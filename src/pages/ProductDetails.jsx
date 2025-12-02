@@ -1,14 +1,59 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import { ChevronRight, ChevronLeft, ShoppingBag } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import { ShoppingCart, Heart, ArrowLeft, Check, Star, Upload, X, Image as ImageIcon, ChevronRight, Shield, Truck, RotateCcw, Share2, ZoomIn } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { getProductByIdApi, addToCartApi, uploadImageApi } from '../utils/Api';
+import { useAuth } from '../context/AuthContext';
+import EAlbumCustomizer from '../components/EAlbumCustomizer';
 
 const ProductDetails = () => {
     const { productId } = useParams();
     const navigate = useNavigate();
+    const { isAuthenticated } = useAuth();
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [activeTab, setActiveTab] = useState('features');
-    const [mainImage, setMainImage] = useState('');
+    const [selectedSize, setSelectedSize] = useState(null);
+    const [selectedFormat, setSelectedFormat] = useState('');
+    const [quantity, setQuantity] = useState(1);
+    const [addingToCart, setAddingToCart] = useState(false);
+    const [uploadedImages, setUploadedImages] = useState([]);
+    const [uploading, setUploading] = useState(false);
+    const [showCustomizer, setShowCustomizer] = useState(false);
+    const [ealbumCustomization, setEalbumCustomization] = useState(null);
+    const [activeTab, setActiveTab] = useState('description');
+    const [currentImageIndex, setCurrentImageIndex] = useState(0);
+    const [isZoomed, setIsZoomed] = useState(false);
+
+    const handleImageUpload = async (e) => {
+        const files = Array.from(e.target.files);
+        if (files.length === 0) return;
+
+        const limit = product.customization?.imageCount || 0;
+        if (uploadedImages.length + files.length > limit) {
+            alert(`You can only upload up to ${limit} images.`);
+            return;
+        }
+
+        setUploading(true);
+        try {
+            const newImages = [];
+            for (const file of files) {
+                const fd = new FormData();
+                fd.append("image", file);
+                const res = await uploadImageApi(fd);
+                newImages.push(res.data.url);
+            }
+            setUploadedImages(prev => [...prev, ...newImages]);
+        } catch (error) {
+            console.error("Upload failed:", error);
+            alert("Failed to upload image");
+        }
+        setUploading(false);
+    };
+
+    const removeUploadedImage = (index) => {
+        setUploadedImages(prev => prev.filter((_, i) => i !== index));
+    };
 
     useEffect(() => {
         fetchProduct();
@@ -16,10 +61,16 @@ const ProductDetails = () => {
 
     const fetchProduct = async () => {
         try {
-            const response = await fetch(`https://zerogravity-backend.vercel.app/api/products/${productId}`);
-            const data = await response.json();
+            const response = await getProductByIdApi(productId);
+            const data = response.data;
             setProduct(data);
-            setMainImage(data.image);
+
+            if (data.type === 'frame' && data.frameSizes?.length > 0) {
+                setSelectedSize(data.frameSizes[0]);
+            }
+            if (data.type === 'ealbum' && data.formats?.length > 0) {
+                setSelectedFormat(data.formats[0]);
+            }
         } catch (error) {
             console.error('Error fetching product:', error);
         } finally {
@@ -27,167 +78,464 @@ const ProductDetails = () => {
         }
     };
 
-    if (loading) return (
-        <div className="min-h-screen flex items-center justify-center bg-zg-bg text-zg-primary">
-            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-zg-accent"></div>
-        </div>
-    );
+    const handleAddToCart = async () => {
+        if (!isAuthenticated) {
+            navigate('/login');
+            return;
+        }
 
-    if (!product) return (
-        <div className="min-h-screen flex items-center justify-center bg-zg-bg text-zg-primary">
-            Product not found
-        </div>
-    );
+        setAddingToCart(true);
+        try {
+            const cartItem = {
+                productId: product._id,
+                quantity,
+            };
 
-    const allImages = [product.image, ...(product.gallery || [])].filter(Boolean);
+            if (product.type === 'frame' && selectedSize) {
+                cartItem.selectedSize = selectedSize;
+            }
+
+            if (product.type === 'ealbum' && selectedFormat) {
+                cartItem.selectedFormat = selectedFormat;
+            }
+
+            if (product.customization?.allowed && uploadedImages.length > 0) {
+                cartItem.customizationImages = uploadedImages;
+            }
+
+            if (product.type === 'ealbum' && ealbumCustomization) {
+                cartItem.ealbumCustomization = ealbumCustomization;
+            }
+
+            await addToCartApi(cartItem);
+            alert('Added to cart successfully!');
+            navigate('/cart');
+        } catch (error) {
+            console.error('Error adding to cart:', error);
+            alert(error.response?.data?.message || 'Failed to add to cart');
+        } finally {
+            setAddingToCart(false);
+        }
+    };
+
+    const getCurrentPrice = () => {
+        if (product.type === 'frame' && selectedSize) {
+            return selectedSize.price || product.price;
+        }
+        return product.price;
+    };
+
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-zg-bg flex items-center justify-center">
+                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-zg-accent"></div>
+            </div>
+        );
+    }
+
+    if (!product) {
+        return (
+            <div className="min-h-screen bg-zg-bg flex items-center justify-center">
+                <div className="text-center">
+                    <h2 className="text-2xl font-bold text-zg-primary mb-4">Product not found</h2>
+                    <button onClick={() => navigate('/shop')} className="text-zg-accent hover:underline">Back to Shop</button>
+                </div>
+            </div>
+        );
+    }
+
+    const allImages = [product.coverImage, ...(product.gallery || [])].filter(Boolean);
 
     return (
-        <div className="min-h-screen bg-zg-bg text-zg-primary">
-            {/* Breadcrumbs */}
-            <div className="max-w-7xl mx-auto px-6 py-4 flex items-center gap-2 text-sm text-zg-secondary">
-                <Link to="/" className="hover:text-zg-primary transition-colors">Home</Link>
-                <ChevronRight className="w-4 h-4" />
-                <Link to="/shop" className="hover:text-zg-primary transition-colors">Shop</Link>
-                <ChevronRight className="w-4 h-4" />
-                <span className="text-zg-primary font-medium">{product.name}</span>
-            </div>
+        <>
+            <div className="min-h-screen bg-zg-bg text-zg-primary py-8 px-4 md:px-8">
+                <div className="max-w-7xl mx-auto">
+                    {/* Breadcrumbs */}
+                    <nav className="flex items-center gap-2 text-sm text-zg-secondary mb-8">
+                        <button onClick={() => navigate('/')} className="hover:text-zg-accent transition">Home</button>
+                        <ChevronRight className="w-4 h-4" />
+                        <button onClick={() => navigate('/shop')} className="hover:text-zg-accent transition">Shop</button>
+                        <ChevronRight className="w-4 h-4" />
+                        <span className="text-zg-primary font-medium truncate">{product.name}</span>
+                    </nav>
 
-            <div className="max-w-7xl mx-auto px-6 py-8">
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-                    {/* Left Column: Gallery */}
-                    <div className="space-y-6">
-                        {/* Main Image */}
-                        <div className="aspect-[4/3] bg-zg-surface/50 rounded-2xl overflow-hidden border border-zg-secondary/10 relative group">
-                            {mainImage ? (
-                                <img src={mainImage} alt={product.name} className="w-full h-full object-cover" />
-                            ) : (
-                                <div className="w-full h-full flex items-center justify-center text-zg-secondary">
-                                    <ShoppingBag className="w-16 h-16 opacity-20" />
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
+                        {/* Left Column: Gallery */}
+                        <div className="space-y-6">
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                className="relative aspect-square bg-zg-surface/50 rounded-3xl overflow-hidden border border-zg-secondary/10 group"
+                            >
+                                <img
+                                    src={allImages[currentImageIndex]}
+                                    alt={product.name}
+                                    className={`w-full h-full object-cover transition-transform duration-500 ${isZoomed ? 'scale-150 cursor-zoom-out' : 'cursor-zoom-in'}`}
+                                    onClick={() => setIsZoomed(!isZoomed)}
+                                />
+
+                                {/* Frame Preview Overlay */}
+                                {product.type === 'frame' && product.customization?.allowed && product.customization?.previewArea && uploadedImages.length > 0 && (
+                                    <div
+                                        className="absolute z-20 overflow-hidden pointer-events-none"
+                                        style={{
+                                            left: `${product.customization.previewArea.x}%`,
+                                            top: `${product.customization.previewArea.y}%`,
+                                            width: `${product.customization.previewArea.width}%`,
+                                            height: `${product.customization.previewArea.height}%`,
+                                        }}
+                                    >
+                                        <img
+                                            src={uploadedImages[uploadedImages.length - 1]}
+                                            className="w-full h-full object-cover"
+                                            alt="Preview"
+                                        />
+                                    </div>
+                                )}
+
+                                <div className="absolute top-4 right-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <button className="p-2 bg-white/10 backdrop-blur-md rounded-full hover:bg-white/20 transition text-white">
+                                        <Heart className="w-5 h-5" />
+                                    </button>
+                                    <button className="p-2 bg-white/10 backdrop-blur-md rounded-full hover:bg-white/20 transition text-white">
+                                        <Share2 className="w-5 h-5" />
+                                    </button>
+                                </div>
+                            </motion.div>
+
+                            {/* Thumbnails */}
+                            {allImages.length > 1 && (
+                                <div className="flex gap-4 overflow-x-auto pb-2 custom-scrollbar">
+                                    {allImages.map((img, idx) => (
+                                        <button
+                                            key={idx}
+                                            onClick={() => setCurrentImageIndex(idx)}
+                                            className={`relative w-24 h-24 flex-shrink-0 rounded-xl overflow-hidden border-2 transition-all ${currentImageIndex === idx ? 'border-zg-accent ring-2 ring-zg-accent/20' : 'border-transparent hover:border-zg-secondary/30'
+                                                }`}
+                                        >
+                                            <img src={img} alt={`View ${idx + 1}`} className="w-full h-full object-cover" />
+                                        </button>
+                                    ))}
                                 </div>
                             )}
-
-                            {/* Navigation Arrows */}
-                            {allImages.length > 1 && (
-                                <>
-                                    <button
-                                        onClick={() => {
-                                            const currentIndex = allImages.indexOf(mainImage);
-                                            const prevIndex = (currentIndex - 1 + allImages.length) % allImages.length;
-                                            setMainImage(allImages[prevIndex]);
-                                        }}
-                                        className="absolute left-4 top-1/2 -translate-y-1/2 p-2 bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70"
-                                    >
-                                        <ChevronLeft className="w-5 h-5" />
-                                    </button>
-                                    <button
-                                        onClick={() => {
-                                            const currentIndex = allImages.indexOf(mainImage);
-                                            const nextIndex = (currentIndex + 1) % allImages.length;
-                                            setMainImage(allImages[nextIndex]);
-                                        }}
-                                        className="absolute right-4 top-1/2 -translate-y-1/2 p-2 bg-black/50 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-black/70"
-                                    >
-                                        <ChevronRight className="w-5 h-5" />
-                                    </button>
-                                </>
-                            )}
                         </div>
 
-                        {/* Thumbnails */}
-                        {allImages.length > 1 && (
-                            <div className="grid grid-cols-4 sm:grid-cols-6 gap-4">
-                                {allImages.map((img, index) => (
-                                    <button
-                                        key={index}
-                                        onClick={() => setMainImage(img)}
-                                        className={`aspect-square rounded-lg overflow-hidden border-2 transition-all ${mainImage === img ? 'border-zg-accent' : 'border-transparent hover:border-zg-secondary/30'
-                                            }`}
-                                    >
-                                        <img src={img} alt={`View ${index + 1}`} className="w-full h-full object-cover" />
-                                    </button>
-                                ))}
-                            </div>
-                        )}
-                    </div>
-
-                    {/* Right Column: Product Info */}
-                    <div className="space-y-8">
-                        <div>
-                            <h1 className="text-4xl font-heading font-bold mb-4">{product.name}</h1>
-                            <p className="text-zg-secondary leading-relaxed text-lg">
-                                {product.description}
-                            </p>
-                        </div>
-
-                        <div className="pt-8 border-t border-zg-secondary/10 space-y-8">
-                            <button
-                                onClick={() => {
-                                    const user = JSON.parse(localStorage.getItem('user'));
-                                    if (user) {
-                                        navigate(`/shop/${productId}/customize`);
-                                    } else {
-                                        navigate('/login', { state: { from: `/shop/${productId}/customize` } });
-                                    }
-                                }}
-                                className="w-full py-4 bg-zg-accent text-black font-bold rounded-xl hover:bg-zg-accent-hover transition-all shadow-lg shadow-zg-accent/20 text-lg uppercase tracking-wide"
+                        {/* Right Column: Product Info */}
+                        <div className="space-y-8">
+                            <motion.div
+                                initial={{ opacity: 0, x: 20 }}
+                                animate={{ opacity: 1, x: 0 }}
                             >
-                                Buy Now
-                            </button>
+                                <div className="flex items-start justify-between mb-4">
+                                    <div>
+                                        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zg-accent/10 text-zg-accent text-xs font-bold uppercase tracking-wider mb-3">
+                                            {product.type === 'frame' ? 'Premium Frame' : 'Digital Album'}
+                                        </div>
+                                        <h1 className="text-4xl md:text-5xl font-heading font-bold leading-tight mb-2">{product.name}</h1>
+                                        <div className="flex items-center gap-4 text-sm text-zg-secondary">
+                                            <div className="flex items-center gap-1 text-yellow-400">
+                                                <Star className="w-4 h-4 fill-current" />
+                                                <span className="font-bold text-white">4.8</span>
+                                            </div>
+                                            <span>(124 reviews)</span>
+                                            <span>•</span>
+                                            <span className={product.stock > 0 ? 'text-green-400' : 'text-red-400'}>
+                                                {product.stock > 0 ? 'In Stock' : 'Out of Stock'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="text-right">
+                                        <div className="text-3xl font-bold text-zg-accent">₹{getCurrentPrice()}</div>
+                                        {product.type === 'frame' && selectedSize && (
+                                            <div className="text-sm text-zg-secondary line-through">₹{Math.round(getCurrentPrice() * 1.2)}</div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <p className="text-zg-secondary text-lg leading-relaxed mb-8">
+                                    {product.description}
+                                </p>
+
+                                {/* Selectors */}
+                                {product.type === 'frame' &&
+                                <div className="space-y-6 p-6 bg-zg-surface/30 rounded-2xl border border-zg-secondary/10 mb-8">
+                                    {product.type === 'frame' && product.frameSizes?.length > 0 && (
+                                        <div>
+                                            <label className="text-sm font-bold text-zg-primary mb-3 block uppercase tracking-wider">Select Size</label>
+                                            <div className="flex flex-wrap gap-3">
+                                                {product.frameSizes.map((size, index) => (
+                                                    <button
+                                                        key={index}
+                                                        onClick={() => setSelectedSize(size)}
+                                                        disabled={!size.inStock}
+                                                        className={`px-4 py-2 rounded-lg border transition-all text-sm font-medium ${selectedSize?.name === size.name
+                                                                ? 'border-zg-accent bg-zg-accent text-black shadow-lg shadow-zg-accent/20'
+                                                                : 'border-zg-secondary/20 hover:border-zg-secondary/50 bg-zg-bg/50'
+                                                            } ${!size.inStock ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                    >
+                                                        {size.name}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {product.type === 'ealbum' && product.formats?.length > 0 && (
+                                        <div>
+                                            <label className="text-sm font-bold text-zg-primary mb-3 block uppercase tracking-wider">Select Format</label>
+                                            <div className="flex flex-wrap gap-3">
+                                                {product.formats.map((format) => (
+                                                    <button
+                                                        key={format}
+                                                        onClick={() => setSelectedFormat(format)}
+                                                        className={`px-4 py-2 rounded-lg border transition-all text-sm font-medium ${selectedFormat === format
+                                                                ? 'border-zg-accent bg-zg-accent text-black shadow-lg shadow-zg-accent/20'
+                                                                : 'border-zg-secondary/20 hover:border-zg-secondary/50 bg-zg-bg/50'
+                                                            }`}
+                                                    >
+                                                        {format}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {/* Quantity */}
+                                    {product.type === 'frame' && (
+                                        <div>
+                                            <label className="text-sm font-bold text-zg-primary mb-3 block uppercase tracking-wider">Quantity</label>
+                                            <div className="flex items-center gap-4 bg-zg-bg/50 inline-flex rounded-xl p-1 border border-zg-secondary/10">
+                                                <button
+                                                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                                                    className="w-10 h-10 rounded-lg hover:bg-zg-surface transition-colors flex items-center justify-center"
+                                                >
+                                                    -
+                                                </button>
+                                                <span className="text-lg font-bold w-8 text-center">{quantity}</span>
+                                                <button
+                                                    onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
+                                                    className="w-10 h-10 rounded-lg hover:bg-zg-surface transition-colors flex items-center justify-center"
+                                                >
+                                                    +
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            }
+
+                                {/* Customization Actions */}
+                                <div className="space-y-4 mb-8">
+                                    {product.customization?.allowed && product.type === 'frame' &&(
+                                        <div className="bg-zg-surface/30 border border-zg-secondary/10 rounded-xl p-5">
+                                            <div className="flex items-center justify-between mb-4">
+                                                <h3 className="font-bold flex items-center gap-2">
+                                                    <Upload className="w-5 h-5 text-zg-accent" />
+                                                    Upload Photos
+                                                </h3>
+                                                <span className="text-xs text-zg-secondary bg-zg-bg px-2 py-1 rounded-full">
+                                                    {uploadedImages.length} / {product.customization.imageCount}
+                                                </span>
+                                            </div>
+
+                                            <div className="flex gap-3 overflow-x-auto pb-2 custom-scrollbar">
+                                                {uploadedImages.map((img, idx) => (
+                                                    <div key={idx} className="relative w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden group">
+                                                        <img src={img} className="w-full h-full object-cover" />
+                                                        <button
+                                                            onClick={() => removeUploadedImage(idx)}
+                                                            className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white"
+                                                        >
+                                                            <X className="w-4 h-4" />
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                                {uploadedImages.length < product.customization.imageCount && (
+                                                    <label className="w-16 h-16 flex-shrink-0 border-2 border-dashed border-zg-secondary/30 rounded-lg flex items-center justify-center cursor-pointer hover:border-zg-accent hover:bg-zg-accent/5 transition">
+                                                        {uploading ? (
+                                                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-zg-accent border-t-transparent"></div>
+                                                        ) : (
+                                                            <Upload className="w-5 h-5 text-zg-secondary" />
+                                                        )}
+                                                        <input type="file" accept="image/*" multiple className="hidden" onChange={handleImageUpload} disabled={uploading} />
+                                                    </label>
+                                                )}
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    {product.type === 'ealbum' && (
+                                        <button
+                                            onClick={() => setShowCustomizer(true)}
+                                            className="w-full py-4 rounded-xl border-2 border-dashed border-zg-accent/50 hover:border-zg-accent hover:bg-zg-accent/5 transition-all flex items-center justify-center gap-3 group"
+                                        >
+                                            <div className="p-2 bg-zg-accent/10 rounded-lg group-hover:bg-zg-accent group-hover:text-black transition-colors">
+                                                <ImageIcon className="w-5 h-5" />
+                                            </div>
+                                            <div className="text-left">
+                                                <div className="font-bold text-zg-primary group-hover:text-zg-accent transition-colors">
+                                                    {ealbumCustomization ? 'Edit Album Design' : 'Customize Your Album'}
+                                                </div>
+                                                <div className="text-xs text-zg-secondary">
+                                                    {ealbumCustomization ? 'Design saved' : 'Click to launch design tool'}
+                                                </div>
+                                            </div>
+                                        </button>
+                                    )}
+                                </div>
+
+                                {/* Action Buttons */}
+                                <div className="flex gap-4">
+                                    <button
+                                        onClick={handleAddToCart}
+                                        disabled={addingToCart || (product.type === 'frame' && product.stock === 0)}
+                                        className="flex-1 py-4 bg-zg-accent text-black font-bold rounded-xl hover:bg-zg-accent/90 transition-all shadow-lg shadow-zg-accent/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-lg"
+                                    >
+                                        <ShoppingCart className="w-5 h-5" />
+                                        {addingToCart ? 'Adding...' : 'Add to Cart'}
+                                    </button>
+                                    <button className="p-4 rounded-xl border border-zg-secondary/20 hover:border-zg-accent/50 hover:text-zg-accent transition-colors">
+                                        <Heart className="w-6 h-6" />
+                                    </button>
+                                </div>
+
+                                {/* Trust Badges */}
+                                <div className="grid grid-cols-3 gap-4 pt-8 border-t border-zg-secondary/10">
+                                    <div className="text-center">
+                                        <div className="w-10 h-10 mx-auto bg-zg-surface rounded-full flex items-center justify-center mb-2">
+                                            <Shield className="w-5 h-5 text-zg-accent" />
+                                        </div>
+                                        <div className="text-xs font-bold">Secure Payment</div>
+                                    </div>
+                                    <div className="text-center">
+                                        <div className="w-10 h-10 mx-auto bg-zg-surface rounded-full flex items-center justify-center mb-2">
+                                            <Truck className="w-5 h-5 text-zg-accent" />
+                                        </div>
+                                        <div className="text-xs font-bold">Fast Delivery</div>
+                                    </div>
+                                    <div className="text-center">
+                                        <div className="w-10 h-10 mx-auto bg-zg-surface rounded-full flex items-center justify-center mb-2">
+                                            <RotateCcw className="w-5 h-5 text-zg-accent" />
+                                        </div>
+                                        <div className="text-xs font-bold">Easy Returns</div>
+                                    </div>
+                                </div>
+                            </motion.div>
                         </div>
                     </div>
-                </div>
 
-                {/* Tabs Section */}
-                <div className="mt-20">
-                    <div className="flex items-center gap-8 border-b border-zg-secondary/10 mb-8">
-                        <button
-                            onClick={() => setActiveTab('features')}
-                            className={`pb-4 text-lg font-bold transition-colors relative ${activeTab === 'features' ? 'text-zg-accent' : 'text-zg-secondary hover:text-zg-primary'
-                                }`}
-                        >
-                            Features
-                            {activeTab === 'features' && (
-                                <div className="absolute bottom-0 left-0 w-full h-0.5 bg-zg-accent"></div>
-                            )}
-                        </button>
-                        <button
-                            onClick={() => setActiveTab('benefits')}
-                            className={`pb-4 text-lg font-bold transition-colors relative ${activeTab === 'benefits' ? 'text-zg-accent' : 'text-zg-secondary hover:text-zg-primary'
-                                }`}
-                        >
-                            Benefits
-                            {activeTab === 'benefits' && (
-                                <div className="absolute bottom-0 left-0 w-full h-0.5 bg-zg-accent"></div>
-                            )}
-                        </button>
-                    </div>
+                    {/* Tabs Section */}
+                    <div className="mt-20">
+                        <div className="flex items-center gap-8 border-b border-zg-secondary/10 mb-8 overflow-x-auto">
+                            {['description', 'features', 'specifications'].map((tab) => (
+                                <button
+                                    key={tab}
+                                    onClick={() => setActiveTab(tab)}
+                                    className={`pb-4 text-lg font-bold capitalize transition-all relative ${activeTab === tab ? 'text-zg-accent' : 'text-zg-secondary hover:text-zg-primary'
+                                        }`}
+                                >
+                                    {tab}
+                                    {activeTab === tab && (
+                                        <motion.div
+                                            layoutId="activeTab"
+                                            className="absolute bottom-0 left-0 right-0 h-1 bg-zg-accent rounded-t-full"
+                                        />
+                                    )}
+                                </button>
+                            ))}
+                        </div>
 
-                    <div className="text-zg-secondary leading-relaxed">
-                        {activeTab === 'features' ? (
-                            product.features && product.features.length > 0 ? (
-                                <ul className="list-disc list-inside space-y-2">
-                                    {product.features.map((feature, index) => (
-                                        <li key={index}>{feature}</li>
-                                    ))}
-                                </ul>
-                            ) : (
-                                <p>No features listed.</p>
-                            )
-                        ) : (
-                            product.benefits && product.benefits.length > 0 ? (
-                                <ul className="list-disc list-inside space-y-2">
-                                    {product.benefits.map((benefit, index) => (
-                                        <li key={index}>{benefit}</li>
-                                    ))}
-                                </ul>
-                            ) : (
-                                <p>No benefits listed.</p>
-                            )
-                        )}
+                        <div className="min-h-[200px]">
+                            <AnimatePresence mode="wait">
+                                {activeTab === 'description' && (
+                                    <motion.div
+                                        key="desc"
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -10 }}
+                                        className="prose prose-invert max-w-none text-zg-secondary"
+                                    >
+                                        <p>{product.description}</p>
+                                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
+                                    </motion.div>
+                                )}
+                                {activeTab === 'features' && (
+                                    <motion.div
+                                        key="feat"
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -10 }}
+                                        className="grid grid-cols-1 md:grid-cols-2 gap-6"
+                                    >
+                                        {product.features?.map((feature, idx) => (
+                                            <div key={idx} className="flex items-start gap-4 p-4 bg-zg-surface/30 rounded-xl border border-zg-secondary/10">
+                                                <div className="p-2 bg-zg-accent/10 rounded-lg text-zg-accent">
+                                                    <Check className="w-5 h-5" />
+                                                </div>
+                                                <div>
+                                                    <h4 className="font-bold mb-1">Feature {idx + 1}</h4>
+                                                    <p className="text-sm text-zg-secondary">{feature}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </motion.div>
+                                )}
+                                {activeTab === 'specifications' && (
+                                    <motion.div
+                                        key="specs"
+                                        initial={{ opacity: 0, y: 10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -10 }}
+                                        className="bg-zg-surface/30 rounded-2xl overflow-hidden border border-zg-secondary/10"
+                                    >
+                                        <table className="w-full text-left">
+                                            <tbody>
+                                                {product.type === 'ealbum' && (
+                                                    <>
+                                                        <tr className="border-b border-zg-secondary/10">
+                                                            <th className="p-4 font-medium text-zg-secondary w-1/3">Author</th>
+                                                            <td className="p-4 font-bold">{product.author || 'N/A'}</td>
+                                                        </tr>
+                                                        <tr className="border-b border-zg-secondary/10">
+                                                            <th className="p-4 font-medium text-zg-secondary">Publisher</th>
+                                                            <td className="p-4 font-bold">{product.publisher || 'N/A'}</td>
+                                                        </tr>
+                                                        <tr className="border-b border-zg-secondary/10">
+                                                            <th className="p-4 font-medium text-zg-secondary">Pages</th>
+                                                            <td className="p-4 font-bold">{product.pageCount || 'N/A'}</td>
+                                                        </tr>
+                                                    </>
+                                                )}
+                                                <tr>
+                                                    <th className="p-4 font-medium text-zg-secondary">Category</th>
+                                                    <td className="p-4 font-bold">{product.category}</td>
+                                                </tr>
+                                                <tr>
+                                                    <th className="p-4 font-medium text-zg-secondary">SKU</th>
+                                                    <td className="p-4 font-bold">{product._id.slice(-8).toUpperCase()}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+
+            {/* E-Album Customizer Modal */}
+            {showCustomizer && product.type === 'ealbum' && (
+                <EAlbumCustomizer
+                    product={product}
+                    onSave={(customization) => {
+                        setEalbumCustomization(customization);
+                        setShowCustomizer(false);
+                    }}
+                    onClose={() => setShowCustomizer(false)}
+                />
+            )}
+        </>
     );
 };
 

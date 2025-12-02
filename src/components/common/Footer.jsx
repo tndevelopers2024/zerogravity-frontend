@@ -11,8 +11,9 @@ const Footer = () => {
                     <div className="space-y-6">
                         <Link to="/" className="flex items-center gap-2 group">
 
-                            <div className="flex flex-col w-40 bg-white p-2 rounded-xl">
-                                <img src="/logo1.png" alt="Logo" />
+                            <div className="flex flex-col bg-white p-2 rounded-xl">
+                                <img src="/logo.png" className="w-20" alt="Logo" />
+                                <h1 className="text-zg-secondary font-bold text-sm">Zero Gravity</h1>
                             </div>
                         </Link>
                         <p className="text-zg-secondary text-sm leading-relaxed">
