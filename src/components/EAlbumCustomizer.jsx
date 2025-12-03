@@ -223,7 +223,7 @@ const EAlbumCustomizer = ({ product, onSave, onClose }) => {
 
     const handleSave = async () => {
         if (!customization.coverDesign.title.trim()) {
-            alert('Please enter a title for your e-album');
+            alert('Please enter a title for your album');
             return;
         }
 
@@ -277,7 +277,7 @@ const EAlbumCustomizer = ({ product, onSave, onClose }) => {
                         className="text-5xl font-bold mb-6 text-white drop-shadow-lg"
                         style={selectedFont?.style}
                     >
-                        {customization.coverDesign.title || 'Your E-Album'}
+                        {customization.coverDesign.title || 'Your Album'}
                     </h1>
                     {customization.coverDesign.date && (
                         <p className="text-white/90 text-xl font-light">
@@ -364,7 +364,7 @@ const EAlbumCustomizer = ({ product, onSave, onClose }) => {
                         <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
                         <div className="relative flex items-center justify-between text-white">
                             <div>
-                                <h2 className="text-3xl font-heading font-bold mb-1">Design Your E-Album</h2>
+                                <h2 className="text-3xl font-heading font-bold mb-1">Design Your Album</h2>
                                 <p className="text-white/80 text-sm">Create a beautiful memory book</p>
                             </div>
                             <div className="flex items-center gap-3">

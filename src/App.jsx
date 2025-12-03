@@ -21,6 +21,7 @@ import AdminSettings from './pages/AdminSettings';
 import MainLayout from './components/layouts/MainLayout';
 import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider } from './context/AuthContext';
+import ScrollToTop from './components/common/ScrollToTop';
 
 import CategoryList from './pages/CategoryList';
 import CreateCategory from './pages/CreateCategory';
@@ -30,6 +31,7 @@ function App() {
     <AuthProvider>
       <ThemeProvider>
         <Router>
+          <ScrollToTop />
           <div className="min-h-screen bg-zg-bg text-zg-primary font-body">
             <Routes>
               {/* All Public Routes with Main Layout (including Auth) */}

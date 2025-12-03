@@ -191,10 +191,10 @@ const Cart = () => {
                                                 </div>
                                             )}
 
-                                            {/* E-Album Customization */}
+                                            {/* Album Customization */}
                                             {item.ealbumCustomization && (
                                                 <div className="mt-3 p-3 bg-zg-surface rounded-lg border border-zg-secondary/10">
-                                                    <p className="text-xs font-bold text-zg-accent mb-2 uppercase tracking-wider">E-Album Details</p>
+                                                    <p className="text-xs font-bold text-zg-accent mb-2 uppercase tracking-wider">Album Details</p>
                                                     <div className="space-y-1 text-sm">
                                                         <p><span className="text-zg-secondary">Title:</span> {item.ealbumCustomization.coverDesign?.title}</p>
                                                         <p><span className="text-zg-secondary">Theme:</span> {item.ealbumCustomization.coverDesign?.color}</p>

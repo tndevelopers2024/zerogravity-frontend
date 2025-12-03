@@ -61,7 +61,7 @@ const Shop = () => {
     const types = [
         { id: 'all', name: 'All Products', icon: ShoppingBag },
         { id: 'frame', name: 'Frames', icon: Frame },
-        { id: 'ealbum', name: 'E-Albums', icon: BookOpen }
+        { id: 'ealbum', name: 'Albums', icon: BookOpen }
     ];
 
     return (
@@ -72,7 +72,7 @@ const Shop = () => {
                     <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">
                         <div>
                             <h1 className="text-4xl font-heading font-bold mb-2">Shop</h1>
-                            <p className="text-zg-secondary">Discover our collection of frames and e-albums</p>
+                            <p className="text-zg-secondary">Discover our collection of frames and albums</p>
                         </div>
                         <button
                             onClick={() => navigate('/my-orders')}
@@ -159,7 +159,7 @@ const Shop = () => {
                                     {/* Type Badge */}
                                     <div className="absolute top-4 left-4">
                                         <span className="px-3 py-1 bg-zg-accent/90 text-black text-xs font-bold rounded-full backdrop-blur-sm">
-                                            {product.type === 'frame' ? 'Frame' : 'E-Album'}
+                                            {product.type === 'frame' ? 'Frame' : 'Album'}
                                         </span>
                                     </div>
 

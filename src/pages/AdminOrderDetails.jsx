@@ -159,13 +159,13 @@ const AdminOrderDetails = () => {
                                             </div>
                                         )}
 
-                                        {/* E-Album Customization Details */}
+                                        {/* Album Customization Details */}
                                         {item.ealbumCustomization && (
                                             <div className="mt-4 p-4 bg-zg-surface rounded-xl border border-zg-secondary/10">
                                                 <div className="flex items-center justify-between mb-3">
                                                     <h5 className="font-bold text-zg-accent flex items-center gap-2">
                                                         <Package className="w-4 h-4" />
-                                                        E-Album Configuration
+                                                        Album Configuration
                                                     </h5>
                                                     <div className="flex gap-2">
                                                         {item.ealbumCustomization.previewFileUrl && (

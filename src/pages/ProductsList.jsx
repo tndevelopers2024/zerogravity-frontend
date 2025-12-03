@@ -84,7 +84,7 @@ const ProductsList = () => {
                     >
                         <option value="all">All Types</option>
                         <option value="frame">Frames</option>
-                        <option value="ealbum">E-Albums</option>
+                        <option value="ealbum">Albums</option>
                     </select>
 
                     <button
@@ -141,7 +141,7 @@ const ProductsList = () => {
                                 {/* Type Badge */}
                                 <div className="absolute top-4 left-4">
                                     <span className="px-3 py-1 bg-zg-accent/90 text-black text-xs font-bold rounded-full backdrop-blur-sm">
-                                        {product.type === 'frame' ? 'Frame' : 'E-Album'}
+                                        {product.type === 'frame' ? 'Frame' : 'Album'}
                                     </span>
                                 </div>
 

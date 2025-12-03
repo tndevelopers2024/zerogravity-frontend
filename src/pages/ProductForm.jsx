@@ -259,7 +259,7 @@ const ProductForm = () => {
                         className="w-full px-4 py-3 rounded-lg bg-zg-surface border border-zg-secondary/10"
                     >
                         <option value="frame">Frame</option>
-                        <option value="ealbum">E-Album</option>
+                        <option value="ealbum">Album</option>
                     </select>
 
                     {/* Category */}

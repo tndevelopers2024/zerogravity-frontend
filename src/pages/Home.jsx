@@ -54,7 +54,7 @@ const Home = () => {
             sizes: ['6x4"', '8x6"', '10x8"', '12x8"', '18x12"', '24x18"']
         },
         {
-            name: 'E-Albums',
+            name: 'Albums',
             icon: BookOpen,
             description: 'Digital photo albums with custom designs',
             gradient: 'from-purple-500/20 to-indigo-500/20',
@@ -106,7 +106,7 @@ const Home = () => {
                     >
                         <div className="inline-flex items-center gap-2 px-4 py-2 bg-zg-accent/10 border border-zg-accent/20 rounded-full mb-6">
                             <Sparkles className="w-4 h-4 text-zg-accent" />
-                            <span className="text-sm text-zg-accent font-medium">Customizable Photo Frames & E-Albums</span>
+                            <span className="text-sm text-zg-accent font-medium">Customizable Photo Frames & Albums</span>
                         </div>
 
                         <h1 className="text-5xl md:text-7xl font-heading font-bold mb-6 bg-gradient-to-r from-zg-primary via-zg-accent to-zg-primary bg-clip-text text-transparent">
@@ -114,7 +114,7 @@ const Home = () => {
                         </h1>
 
                         <p className="text-xl md:text-2xl text-zg-secondary mb-8 max-w-3xl mx-auto">
-                            Discover premium customizable frames and e-albums to capture and cherish your special moments forever
+                            Discover premium customizable frames and albums to capture and cherish your special moments forever
                         </p>
 
                         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -201,7 +201,7 @@ const Home = () => {
                                     whileInView={{ opacity: 1, y: 0 }}
                                     viewport={{ once: true }}
                                     transition={{ duration: 0.6, delay: index * 0.1 }}
-                                    onClick={() => navigate(`/product/${product._id}`)}
+                                    onClick={() => navigate(`/shop/${product._id}`)}
                                     className="group cursor-pointer bg-zg-surface/50 backdrop-blur-xl border border-zg-secondary/10 rounded-2xl overflow-hidden hover:border-zg-accent/50 transition-all duration-300 hover:shadow-xl hover:shadow-zg-accent/10"
                                 >
                                     <div className="aspect-square relative overflow-hidden bg-zg-secondary/5">
@@ -224,7 +224,7 @@ const Home = () => {
                                     </div>
                                     <div className="p-6">
                                         <div className="text-xs text-zg-accent font-medium mb-2">
-                                            {product.type === 'frame' ? 'Photo Frame' : 'E-Album'}
+                                            {product.type === 'frame' ? 'Photo Frame' : 'Album'}
                                         </div>
                                         <h3 className="font-bold text-lg mb-2 line-clamp-1">{product.name}</h3>
                                         <p className="text-sm text-zg-secondary mb-4 line-clamp-2">{product.description}</p>

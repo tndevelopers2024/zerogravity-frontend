@@ -551,7 +551,7 @@ const ProductDetails = () => {
                 </div>
             </div>
 
-            {/* E-Album Customizer Modal */}
+            {/* Album Customizer Modal */}
             {showCustomizer && product.type === 'ealbum' && (
                 <EAlbumCustomizer
                     product={product}
