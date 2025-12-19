@@ -158,11 +158,7 @@ const Cart = () => {
                                         <div className="flex-1">
                                             <h3 className="text-lg font-bold mb-2">{item.product?.name}</h3>
 
-                                            {item.selectedSize && (
-                                                <p className="text-sm text-zg-secondary mb-1">
-                                                    Size: {item.selectedSize.name}
-                                                </p>
-                                            )}
+
 
                                             {item.selectedFormat && (
                                                 <p className="text-sm text-zg-secondary mb-1">
@@ -214,25 +210,7 @@ const Cart = () => {
                                                 <Trash2 className="w-5 h-5" />
                                             </button>
 
-                                            {item.product?.type === 'frame' && (
-                                                <div className="flex items-center gap-3">
-                                                    <button
-                                                        onClick={() => updateQuantity(item._id, item.quantity - 1)}
-                                                        disabled={updating || item.quantity <= 1}
-                                                        className="w-8 h-8 rounded-lg bg-zg-surface border border-zg-secondary/10 hover:border-zg-accent transition-colors disabled:opacity-50"
-                                                    >
-                                                        <Minus className="w-4 h-4 mx-auto" />
-                                                    </button>
-                                                    <span className="text-lg font-medium w-8 text-center">{item.quantity}</span>
-                                                    <button
-                                                        onClick={() => updateQuantity(item._id, item.quantity + 1)}
-                                                        disabled={updating}
-                                                        className="w-8 h-8 rounded-lg bg-zg-surface border border-zg-secondary/10 hover:border-zg-accent transition-colors disabled:opacity-50"
-                                                    >
-                                                        <Plus className="w-4 h-4 mx-auto" />
-                                                    </button>
-                                                </div>
-                                            )}
+
 
                                             <p className="text-lg font-bold">
                                                 ₹{calculateItemTotal(item)}

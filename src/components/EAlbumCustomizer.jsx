@@ -4,12 +4,15 @@ import { motion, AnimatePresence } from 'framer-motion';
 import HTMLFlipBook from 'react-pageflip';
 import { uploadImageApi } from '../utils/Api';
 
-const EAlbumCustomizer = ({ product, onSave, onClose }) => {
+const EAlbumCustomizer = ({ product, onSave, onClose, pageCount }) => {
     const [showPreview, setShowPreview] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [isGridView, setIsGridView] = useState(true);
     const flipBookRef = useRef();
-    const totalPages = product.pageCount || 20;
+    const [selectedSize, setSelectedSize] = useState(product.albumSizes?.[0] || '');
+    const [selectedSheetOption, setSelectedSheetOption] = useState(product.albumSheetOptions?.[0] || null);
+
+    const totalPages = selectedSheetOption?.pageCount || product.pageCount || 20;
 
     const [customization, setCustomization] = useState({
         coverDesign: {
@@ -58,6 +61,31 @@ const EAlbumCustomizer = ({ product, onSave, onClose }) => {
         { id: 'collage', name: 'Collage', icon: '⊡', description: 'Artistic arrangement' },
     ];
 
+    const handleSheetOptionChange = (option) => {
+        setSelectedSheetOption(option);
+        const newTotalPages = option.pageCount || 20;
+
+        setCustomization(prev => {
+            const currentPages = prev.pages;
+            let newPages;
+
+            if (newTotalPages > currentPages.length) {
+                // Add new empty pages
+                const additionalPages = Array.from({ length: newTotalPages - currentPages.length }, (_, i) => ({
+                    pageNumber: currentPages.length + i + 1,
+                    images: [],
+                    layout: 'single'
+                }));
+                newPages = [...currentPages, ...additionalPages];
+            } else {
+                // Remove extra pages (trim from end)
+                newPages = currentPages.slice(0, newTotalPages);
+            }
+
+            return { ...prev, pages: newPages };
+        });
+    };
+
     const handleBulkUpload = async (e) => {
         const files = Array.from(e.target.files);
         if (files.length === 0) return;
@@ -104,6 +132,40 @@ const EAlbumCustomizer = ({ product, onSave, onClose }) => {
                 return { ...prev, pages: newPages };
             });
 
+        } catch (error) {
+            console.error('Upload error:', error);
+            alert('Failed to upload images');
+        } finally {
+            setUploading(false);
+            setUploadProgress({ current: 0, total: 0 });
+        }
+    };
+
+    const handlePageUpload = async (e, pageIndex) => {
+        const files = Array.from(e.target.files);
+        if (files.length === 0) return;
+
+        setUploading(true);
+        setUploadProgress({ current: 0, total: files.length });
+        try {
+            const uploadedUrls = [];
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const formData = new FormData();
+                formData.append('image', file);
+                const res = await uploadImageApi(formData);
+                uploadedUrls.push(res.data.url);
+                setUploadProgress({ current: i + 1, total: files.length });
+            }
+
+            setCustomization(prev => ({
+                ...prev,
+                pages: prev.pages.map((page, idx) =>
+                    idx === pageIndex
+                        ? { ...page, images: [...page.images, ...uploadedUrls] }
+                        : page
+                )
+            }));
         } catch (error) {
             console.error('Upload error:', error);
             alert('Failed to upload images');
@@ -242,7 +304,9 @@ const EAlbumCustomizer = ({ product, onSave, onClose }) => {
 
             onSave({
                 ...customization,
-                previewFileUrl
+                previewFileUrl,
+                selectedSize,
+                selectedSheetOption
             });
             onClose();
         } catch (error) {
@@ -397,6 +461,81 @@ const EAlbumCustomizer = ({ product, onSave, onClose }) => {
                     {/* Content */}
                     <div className="flex-1 overflow-y-auto p-8">
                         <div className="max-w-6xl mx-auto space-y-8">
+                            {/* Album Configuration Section */}
+                            {(product.albumSizes?.length > 0 || product.albumSheetOptions?.length > 0) && (
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="bg-zg-surface/50 backdrop-blur-xl border border-zg-secondary/10 rounded-2xl p-6"
+                                >
+                                    <div className="flex items-center gap-3 mb-6">
+                                        <div className="p-3 bg-zg-accent/10 rounded-xl">
+                                            <Layout className="w-6 h-6 text-zg-accent" />
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-bold text-zg-primary">Album Configuration</h3>
+                                            <p className="text-sm text-zg-secondary">Choose your album size and page count (changing pages will resize the album)</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                        {/* Size Selection */}
+                                        {product.albumSizes?.length > 0 && (
+                                            <div>
+                                                <label className="text-sm font-medium text-zg-secondary mb-3 block">Size</label>
+                                                <div className="flex flex-wrap gap-3">
+                                                    {product.albumSizes.map((size) => (
+                                                        <button
+                                                            key={size}
+                                                            onClick={() => setSelectedSize(size)}
+                                                            className={`px-4 py-2 rounded-lg border transition-all text-sm font-medium ${selectedSize === size
+                                                                ? 'border-zg-accent bg-zg-accent text-black shadow-lg shadow-zg-accent/20'
+                                                                : 'border-zg-secondary/20 hover:border-zg-secondary/50 bg-zg-bg/50 text-zg-primary'
+                                                                }`}
+                                                        >
+                                                            {size}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Sheet Option Selection */}
+                                        {product.albumSheetOptions?.length > 0 && (
+                                            <div>
+                                                <label className="text-sm font-medium text-zg-secondary mb-3 block">Pages</label>
+                                                <div className="space-y-2">
+                                                    {product.albumSheetOptions.map((option, idx) => (
+                                                        <button
+                                                            key={idx}
+                                                            onClick={() => handleSheetOptionChange(option)}
+                                                            className={`w-full text-left p-3 rounded-xl border transition-all flex items-center justify-between ${selectedSheetOption?.name === option.name
+                                                                ? 'border-zg-accent bg-zg-accent/10'
+                                                                : 'border-zg-secondary/20 hover:border-zg-secondary/50 text-zg-primary'
+                                                                }`}
+                                                        >
+                                                            <div>
+                                                                <div className={`font-bold ${selectedSheetOption?.name === option.name ? 'text-zg-accent' : 'text-zg-primary'}`}>
+                                                                    {option.name}
+                                                                </div>
+                                                                <div className="text-xs text-zg-secondary">
+                                                                    {option.pageCount} Pages
+                                                                </div>
+                                                            </div>
+                                                            {option.price > 0 && (
+                                                                <div className="text-sm font-medium text-zg-primary">
+                                                                    +₹{option.price}
+                                                                </div>
+                                                            )}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                </motion.div>
+                            )}
+
                             {/* Cover Design Section */}
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
@@ -607,6 +746,22 @@ const EAlbumCustomizer = ({ product, onSave, onClose }) => {
                                             </div>
                                         </div>
 
+                                        {/* Upload button for current page */}
+                                        <div className="mb-4">
+                                            <label className="flex items-center justify-center gap-2 px-4 py-2 bg-zg-accent/10 border-2 border-dashed border-zg-accent/30 text-zg-accent font-medium rounded-xl hover:bg-zg-accent/20 transition cursor-pointer">
+                                                <Upload className="w-4 h-4" />
+                                                {uploading ? `Uploading ${uploadProgress.current}/${uploadProgress.total}` : `Upload to Page ${currentPage}`}
+                                                <input
+                                                    type="file"
+                                                    accept="image/*"
+                                                    multiple
+                                                    className="hidden"
+                                                    onChange={(e) => handlePageUpload(e, currentPage - 1)}
+                                                    disabled={uploading}
+                                                />
+                                            </label>
+                                        </div>
+
                                         <div className="aspect-[3/2] bg-white rounded-xl shadow-lg overflow-hidden border border-zg-secondary/10">
                                             {renderPage(currentPageData)}
                                         </div>
@@ -634,6 +789,19 @@ const EAlbumCustomizer = ({ product, onSave, onClose }) => {
                                                         ))}
                                                     </div>
                                                 </div>
+                                                {/* Upload button for each page */}
+                                                <label className="flex items-center justify-center gap-1 px-2 py-1.5 bg-zg-accent/10 border border-dashed border-zg-accent/30 text-zg-accent text-xs font-medium rounded-lg hover:bg-zg-accent/20 transition cursor-pointer">
+                                                    <Upload className="w-3 h-3" />
+                                                    Upload
+                                                    <input
+                                                        type="file"
+                                                        accept="image/*"
+                                                        multiple
+                                                        className="hidden"
+                                                        onChange={(e) => handlePageUpload(e, page.pageNumber - 1)}
+                                                        disabled={uploading}
+                                                    />
+                                                </label>
                                                 <div className="aspect-[3/2] bg-white rounded-xl shadow overflow-hidden border border-zg-secondary/10">
                                                     {renderPage(page)}
                                                 </div>

@@ -11,7 +11,7 @@ const ProductsList = () => {
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
-    const [typeFilter, setTypeFilter] = useState('all');
+
 
     useEffect(() => {
         fetchProducts();
@@ -19,7 +19,7 @@ const ProductsList = () => {
 
     useEffect(() => {
         filterProducts();
-    }, [products, searchQuery, typeFilter]);
+    }, [products, searchQuery]);
 
     const fetchProducts = async () => {
         try {
@@ -36,9 +36,7 @@ const ProductsList = () => {
     const filterProducts = () => {
         let filtered = products;
 
-        if (typeFilter !== 'all') {
-            filtered = filtered.filter(p => p.type === typeFilter);
-        }
+
 
         if (searchQuery) {
             filtered = filtered.filter(p =>
@@ -78,13 +76,8 @@ const ProductsList = () => {
 
                 <div className="flex gap-3">
                     <select
-                        value={typeFilter}
-                        onChange={(e) => setTypeFilter(e.target.value)}
-                        className="px-4 py-3 rounded-lg bg-zg-surface border border-zg-secondary/10 text-zg-primary focus:outline-none focus:border-zg-accent focus:ring-1 focus:ring-zg-accent transition"
+                        className="px-4 py-3 rounded-lg bg-zg-surface border border-zg-secondary/10 text-zg-primary focus:outline-none focus:border-zg-accent focus:ring-1 focus:ring-zg-accent transition opacity-0 pointer-events-none w-0 p-0 m-0 border-0"
                     >
-                        <option value="all">All Types</option>
-                        <option value="frame">Frames</option>
-                        <option value="ealbum">Albums</option>
                     </select>
 
                     <button
@@ -141,7 +134,7 @@ const ProductsList = () => {
                                 {/* Type Badge */}
                                 <div className="absolute top-4 left-4">
                                     <span className="px-3 py-1 bg-zg-accent/90 text-black text-xs font-bold rounded-full backdrop-blur-sm">
-                                        {product.type === 'frame' ? 'Frame' : 'Album'}
+                                        {product.type === 'ealbum' ? 'Album' : 'Product'}
                                     </span>
                                 </div>
 
@@ -161,14 +154,7 @@ const ProductsList = () => {
 
                                 <div className="flex items-center justify-between mb-4">
                                     <span className="text-xl font-bold text-zg-accent">₹{product.price}</span>
-                                    {product.type === 'frame' && (
-                                        <span className={`text-sm ${product.stock > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                                            Stock: {product.stock}
-                                        </span>
-                                    )}
-                                    {product.type === 'ealbum' && (
-                                        <span className="text-sm text-blue-400">Digital</span>
-                                    )}
+                                    <span className="text-sm text-blue-400">Digital</span>
                                 </div>
 
                                 <div className="flex gap-2">

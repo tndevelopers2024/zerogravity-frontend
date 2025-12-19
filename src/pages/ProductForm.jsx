@@ -18,7 +18,7 @@ const ProductForm = () => {
     const [categories, setCategories] = useState([]);
 
     const [formData, setFormData] = useState({
-        type: 'frame',
+        type: 'ealbum',
         name: '',
         description: '',
         category: '',
@@ -26,9 +26,7 @@ const ProductForm = () => {
         gallery: [],
         price: '',
         stock: 0,
-        frameSizes: [],
-        frameMaterials: [],
-        frameColors: [],
+
         formats: [],
         pageCount: '',
         author: '',
@@ -41,7 +39,9 @@ const ProductForm = () => {
             allowed: false,
             imageCount: 0,
             previewArea: { x: 10, y: 10, width: 80, height: 80 }
-        }
+        },
+        albumSizes: [],
+        albumSheetOptions: []
     });
 
     const [loading, setLoading] = useState(false);
@@ -78,24 +78,23 @@ const ProductForm = () => {
                 coverImage: data.coverImage,
                 gallery: data.gallery,
                 price: data.price,
-                stock: data.stock,
-                frameSizes: data.frameSizes || [],
-                frameMaterials: data.frameMaterials || [],
-                frameColors: data.frameColors || [],
+
                 formats: data.formats || [],
                 pageCount: data.pageCount || '',
                 author: data.author || '',
                 publisher: data.publisher || '',
                 isbn: data.isbn || '',
                 digitalDownloadUrl: data.digitalDownloadUrl || '',
-                digitalDownloadUrl: data.digitalDownloadUrl || '',
+
                 features: data.features || [],
                 benefits: data.benefits || [],
                 customization: data.customization || {
                     allowed: false,
                     imageCount: 0,
                     previewArea: { x: 10, y: 10, width: 80, height: 80 }
-                }
+                },
+                albumSizes: data.albumSizes || [],
+                albumSheetOptions: data.albumSheetOptions || []
             });
         } catch (error) {
             console.error('Error fetching product:', error);
@@ -127,25 +126,27 @@ const ProductForm = () => {
         }));
     };
 
-    const handleFrameSizeChange = (index, field, value) => {
-        const sizes = [...formData.frameSizes];
-        sizes[index] = { ...sizes[index], [field]: value };
-        setFormData(prev => ({ ...prev, frameSizes: sizes }));
+    const handleSheetOptionChange = (index, key, value) => {
+        const updated = [...formData.albumSheetOptions];
+        updated[index] = { ...updated[index], [key]: value };
+        setFormData(prev => ({ ...prev, albumSheetOptions: updated }));
     };
 
-    const addFrameSize = () => {
+    const addSheetOption = () => {
         setFormData(prev => ({
             ...prev,
-            frameSizes: [...prev.frameSizes, { name: "", price: 0, inStock: true }]
+            albumSheetOptions: [...prev.albumSheetOptions, { name: '', pageCount: 20, price: 0 }]
         }));
     };
 
-    const removeFrameSize = (index) => {
+    const removeSheetOption = (index) => {
         setFormData(prev => ({
             ...prev,
-            frameSizes: prev.frameSizes.filter((_, i) => i !== index)
+            albumSheetOptions: prev.albumSheetOptions.filter((_, i) => i !== index)
         }));
     };
+
+
 
     const handleFormatChange = (e) => {
         const { value, checked } = e.target;
@@ -211,12 +212,11 @@ const ProductForm = () => {
             ...formData,
             isDigital: formData.type === "ealbum",
             features: formData.features.filter(f => f.trim()),
-            benefits: formData.benefits.filter(b => b.trim()),
-            frameSizes: formData.type === "frame" ? formData.frameSizes : [],
-            frameMaterials: formData.type === "frame" ? formData.frameMaterials : [],
-            frameColors: formData.type === "frame" ? formData.frameColors : [],
-            formats: formData.type === "ealbum" ? formData.formats : [],
-            customization: formData.customization
+
+            formats: formData.formats,
+            customization: formData.customization,
+            albumSizes: formData.albumSizes.filter(s => s.trim()),
+            albumSheetOptions: formData.albumSheetOptions.filter(o => o.name.trim())
         };
         try {
             if (isEditMode) {
@@ -245,22 +245,12 @@ const ProductForm = () => {
                 <span>Back to Products</span>
             </button>
 
-            <form onSubmit={handleSubmit} className="max-w-4xl mx-auto space-y-6">
+            <form onSubmit={handleSubmit} className="custom-container mx-auto space-y-6">
 
                 {/* Product Section */}
                 <div className="bg-zg-surface/50 border border-zg-secondary/10 p-6 rounded-2xl">
 
-                    {/* Product Type */}
-                    <label className="text-zg-secondary text-sm block mb-2">Product Type</label>
-                    <select
-                        name="type"
-                        value={formData.type}
-                        onChange={handleChange}
-                        className="w-full px-4 py-3 rounded-lg bg-zg-surface border border-zg-secondary/10"
-                    >
-                        <option value="frame">Frame</option>
-                        <option value="ealbum">Album</option>
-                    </select>
+
 
                     {/* Category */}
                     <div className="mt-4">
@@ -319,21 +309,109 @@ const ProductForm = () => {
                         />
                     </div>
 
-                    {/* Stock (only for Frame) */}
-                    {formData.type === "frame" && (
-                        <div className="mt-4">
-                            <label className="text-zg-secondary text-sm block mb-2">Stock</label>
-                            <input
-                                type="number"
-                                name="stock"
-                                value={formData.stock}
-                                onChange={handleChange}
-                                className="w-full px-4 py-3 rounded-lg bg-zg-surface border border-zg-secondary/10"
-                            />
-                        </div>
-                    )}
+
 
                 </div>
+
+                {/* ALBUM CONFIGURATION */}
+                {formData.type === 'ealbum' && (
+                    <div className="bg-zg-surface/50 border border-zg-secondary/10 p-6 rounded-2xl mb-6">
+                        <h3 className="text-lg font-bold mb-6 text-zg-primary">Album Configuration</h3>
+
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            {/* Album Sizes */}
+                            <div>
+                                <label className="text-zg-primary text-sm font-medium block mb-3">Available Sizes</label>
+                                <div className="space-y-3">
+                                    {formData.albumSizes.map((size, index) => (
+                                        <div key={index} className="flex items-center gap-2">
+                                            <input
+                                                type="text"
+                                                value={size}
+                                                onChange={(e) => handleListChange('albumSizes', index, e.target.value)}
+                                                placeholder="e.g. 12X20"
+                                                className="flex-1 px-4 py-3 rounded-lg bg-zg-surface border border-zg-secondary/10 text-zg-primary focus:outline-none focus:border-zg-accent transition"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => removeListItem('albumSizes', index)}
+                                                className="p-3 rounded-lg bg-red-500/10 text-red-500 hover:bg-red-500/20 transition"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                    ))}
+                                    <button
+                                        type="button"
+                                        onClick={() => addListItem('albumSizes')}
+                                        className="w-full py-3 rounded-lg border-2 border-dashed border-zg-secondary/20 hover:border-zg-accent/50 text-zg-secondary hover:text-zg-accent transition flex items-center justify-center gap-2"
+                                    >
+                                        <Plus className="w-4 h-4" />
+                                        Add Size
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* Sheet Options */}
+                            <div>
+                                <label className="text-zg-primary text-sm font-medium block mb-3">Sheet Options</label>
+                                <div className="space-y-4">
+                                    {formData.albumSheetOptions.map((option, index) => (
+                                        <div key={index} className="bg-zg-surface p-4 rounded-lg border border-zg-secondary/10 relative">
+                                            <button
+                                                type="button"
+                                                onClick={() => removeSheetOption(index)}
+                                                className="absolute top-2 right-2 text-red-500 hover:bg-red-500/10 p-1 rounded transition"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                            <div className="grid grid-cols-1 gap-3">
+                                                <div>
+                                                    <label className="text-xs text-zg-secondary mb-1 block">Option Name</label>
+                                                    <input
+                                                        type="text"
+                                                        value={option.name}
+                                                        onChange={(e) => handleSheetOptionChange(index, 'name', e.target.value)}
+                                                        placeholder="e.g. 11SHEETS (SOFT COVER)"
+                                                        className="w-full px-3 py-2 rounded bg-zg-bg border border-zg-secondary/10 text-sm"
+                                                    />
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-3">
+                                                    <div>
+                                                        <label className="text-xs text-zg-secondary mb-1 block">Pages</label>
+                                                        <input
+                                                            type="number"
+                                                            value={option.pageCount}
+                                                            onChange={(e) => handleSheetOptionChange(index, 'pageCount', parseInt(e.target.value) || 0)}
+                                                            className="w-full px-3 py-2 rounded bg-zg-bg border border-zg-secondary/10 text-sm"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label className="text-xs text-zg-secondary mb-1 block">Extra Price</label>
+                                                        <input
+                                                            type="number"
+                                                            value={option.price}
+                                                            onChange={(e) => handleSheetOptionChange(index, 'price', parseFloat(e.target.value) || 0)}
+                                                            className="w-full px-3 py-2 rounded bg-zg-bg border border-zg-secondary/10 text-sm"
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    <button
+                                        type="button"
+                                        onClick={addSheetOption}
+                                        className="w-full py-3 rounded-lg border-2 border-dashed border-zg-secondary/20 hover:border-zg-accent/50 text-zg-secondary hover:text-zg-accent transition flex items-center justify-center gap-2"
+                                    >
+                                        <Plus className="w-4 h-4" />
+                                        Add Sheet Option
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                )}
 
                 {/* IMAGE UPLOAD SECTION */}
                 <div className="bg-zg-surface/50 border border-zg-secondary/10 p-6 rounded-2xl">
@@ -500,7 +578,7 @@ const ProductForm = () => {
                                 />
                             </div>
 
-                            {(formData.type === "frame" || formData.type === "ealbum") && (
+                            {formData.type === "ealbum" && (
                                 <div>
                                     <label className="text-zg-primary font-medium block mb-3">Cover Preview Area (%)</label>
                                     <p className="text-xs text-zg-secondary mb-3">

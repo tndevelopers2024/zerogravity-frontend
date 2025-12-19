@@ -46,14 +46,6 @@ const Home = () => {
 
     const categories = [
         {
-            name: 'Photo Frames',
-            icon: Frame,
-            description: 'Customizable photo frames in various sizes',
-            gradient: 'from-pink-500/20 to-rose-500/20',
-            route: '/shop?type=frame',
-            sizes: ['6x4"', '8x6"', '10x8"', '12x8"', '18x12"', '24x18"']
-        },
-        {
             name: 'Albums',
             icon: BookOpen,
             description: 'Digital photo albums with custom designs',
@@ -106,7 +98,7 @@ const Home = () => {
                     >
                         <div className="inline-flex items-center gap-2 px-4 py-2 bg-zg-accent/10 border border-zg-accent/20 rounded-full mb-6">
                             <Sparkles className="w-4 h-4 text-zg-accent" />
-                            <span className="text-sm text-zg-accent font-medium">Customizable Photo Frames & Albums</span>
+                            <span className="text-sm text-zg-accent font-medium">Customizable Photo Albums</span>
                         </div>
 
                         <h1 className="text-5xl md:text-7xl font-heading font-bold mb-6 bg-gradient-to-r from-zg-primary via-zg-accent to-zg-primary bg-clip-text text-transparent">
@@ -114,7 +106,7 @@ const Home = () => {
                         </h1>
 
                         <p className="text-xl md:text-2xl text-zg-secondary mb-8 max-w-3xl mx-auto">
-                            Discover premium customizable frames and albums to capture and cherish your special moments forever
+                            Discover premium customizable albums to capture and cherish your special moments forever
                         </p>
 
                         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
@@ -224,7 +216,7 @@ const Home = () => {
                                     </div>
                                     <div className="p-6">
                                         <div className="text-xs text-zg-accent font-medium mb-2">
-                                            {product.type === 'frame' ? 'Photo Frame' : 'Album'}
+                                            {product.type === 'ealbum' ? 'Album' : 'Product'}
                                         </div>
                                         <h3 className="font-bold text-lg mb-2 line-clamp-1">{product.name}</h3>
                                         <p className="text-sm text-zg-secondary mb-4 line-clamp-2">{product.description}</p>
@@ -341,7 +333,7 @@ const Home = () => {
                             Why Choose Zerogravity?
                         </h2>
                         <p className="text-zg-secondary text-lg">
-                            We're committed to delivering excellence in every frame
+                            We're committed to delivering excellence in every album
                         </p>
                     </motion.div>
 
@@ -390,7 +382,7 @@ const Home = () => {
                             </h2>
 
                             <p className="text-zg-secondary text-lg mb-8">
-                                Start customizing your frames and albums today
+                                Start customizing your albums today
                             </p>
 
                             <div className="flex flex-col sm:flex-row gap-4 justify-center">

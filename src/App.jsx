@@ -36,7 +36,7 @@ function App() {
             <Routes>
               {/* All Public Routes with Main Layout (including Auth) */}
               <Route element={<MainLayout />}>
-                <Route path="/" element={<Home />} />
+                <Route path="/" element={<Shop />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/login" element={<Login />} />
                 <Route path="/shop" element={<Shop />} />

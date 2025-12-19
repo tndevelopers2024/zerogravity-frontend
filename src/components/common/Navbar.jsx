@@ -37,25 +37,12 @@ const Navbar = () => {
 
     return (
         <nav className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? 'bg-zg-bg/80 backdrop-blur-md border-b border-zg-secondary/10 py-4' : 'bg-transparent py-6'}`}>
-            <div className="max-w-7xl mx-auto px-6 flex justify-between items-center">
+            <div className="custom-container mx-auto px-6 flex justify-between items-center">
                 {/* Logo */}
                 <Link to="/" className="text-2xl font-heading font-bold tracking-tighter flex items-center gap-2">
                     <img src="/logo.png" className="w-10" alt="Logo" />
                     <span className="text-zg-accent">ZERO</span>GRAVITY
                 </Link>
-
-                {/* Desktop Nav */}
-                <div className="hidden md:flex items-center gap-8">
-                    {navLinks.map((link) => (
-                        <Link
-                            key={link.name}
-                            to={link.path}
-                            className={`text-sm font-heading font-medium tracking-widest uppercase transition-colors hover:text-zg-accent ${location.pathname === link.path ? 'text-zg-accent' : 'text-zg-secondary'}`}
-                        >
-                            {link.name}
-                        </Link>
-                    ))}
-                </div>
 
                 {/* Icons & User Menu */}
                 <div className="hidden md:flex items-center gap-6">

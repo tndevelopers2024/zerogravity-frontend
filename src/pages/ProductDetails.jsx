@@ -12,7 +12,7 @@ const ProductDetails = () => {
     const { isAuthenticated } = useAuth();
     const [product, setProduct] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [selectedSize, setSelectedSize] = useState(null);
+
     const [selectedFormat, setSelectedFormat] = useState('');
     const [quantity, setQuantity] = useState(1);
     const [addingToCart, setAddingToCart] = useState(false);
@@ -65,9 +65,6 @@ const ProductDetails = () => {
             const data = response.data;
             setProduct(data);
 
-            if (data.type === 'frame' && data.frameSizes?.length > 0) {
-                setSelectedSize(data.frameSizes[0]);
-            }
             if (data.type === 'ealbum' && data.formats?.length > 0) {
                 setSelectedFormat(data.formats[0]);
             }
@@ -91,9 +88,7 @@ const ProductDetails = () => {
                 quantity,
             };
 
-            if (product.type === 'frame' && selectedSize) {
-                cartItem.selectedSize = selectedSize;
-            }
+
 
             if (product.type === 'ealbum' && selectedFormat) {
                 cartItem.selectedFormat = selectedFormat;
@@ -105,6 +100,8 @@ const ProductDetails = () => {
 
             if (product.type === 'ealbum' && ealbumCustomization) {
                 cartItem.ealbumCustomization = ealbumCustomization;
+                if (ealbumCustomization.selectedSize) cartItem.selectedSize = ealbumCustomization.selectedSize;
+                if (ealbumCustomization.selectedSheetOption) cartItem.selectedSheetOption = ealbumCustomization.selectedSheetOption;
             }
 
             await addToCartApi(cartItem);
@@ -119,10 +116,11 @@ const ProductDetails = () => {
     };
 
     const getCurrentPrice = () => {
-        if (product.type === 'frame' && selectedSize) {
-            return selectedSize.price || product.price;
+        let price = product.price;
+        if (ealbumCustomization?.selectedSheetOption?.price) {
+            price += ealbumCustomization.selectedSheetOption.price;
         }
-        return product.price;
+        return price;
     };
 
     if (loading) {
@@ -149,7 +147,7 @@ const ProductDetails = () => {
     return (
         <>
             <div className="min-h-screen bg-zg-bg text-zg-primary py-8 px-4 md:px-8">
-                <div className="max-w-7xl mx-auto">
+                <div className="custom-container mx-auto">
                     {/* Breadcrumbs */}
                     <nav className="flex items-center gap-2 text-sm text-zg-secondary mb-8">
                         <button onClick={() => navigate('/')} className="hover:text-zg-accent transition">Home</button>
@@ -174,24 +172,8 @@ const ProductDetails = () => {
                                     onClick={() => setIsZoomed(!isZoomed)}
                                 />
 
-                                {/* Frame Preview Overlay */}
-                                {product.type === 'frame' && product.customization?.allowed && product.customization?.previewArea && uploadedImages.length > 0 && (
-                                    <div
-                                        className="absolute z-20 overflow-hidden pointer-events-none"
-                                        style={{
-                                            left: `${product.customization.previewArea.x}%`,
-                                            top: `${product.customization.previewArea.y}%`,
-                                            width: `${product.customization.previewArea.width}%`,
-                                            height: `${product.customization.previewArea.height}%`,
-                                        }}
-                                    >
-                                        <img
-                                            src={uploadedImages[uploadedImages.length - 1]}
-                                            className="w-full h-full object-cover"
-                                            alt="Preview"
-                                        />
-                                    </div>
-                                )}
+
+
 
                                 <div className="absolute top-4 right-4 flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <button className="p-2 bg-white/10 backdrop-blur-md rounded-full hover:bg-white/20 transition text-white">
@@ -229,7 +211,7 @@ const ProductDetails = () => {
                                 <div className="flex items-start justify-between mb-4">
                                     <div>
                                         <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-zg-accent/10 text-zg-accent text-xs font-bold uppercase tracking-wider mb-3">
-                                            {product.type === 'frame' ? 'Premium Frame' : 'Digital Album'}
+                                            {product.type === 'ealbum' ? 'Digital Album' : 'Album'}
                                         </div>
                                         <h1 className="text-4xl md:text-5xl font-heading font-bold leading-tight mb-2">{product.name}</h1>
                                         <div className="flex items-center gap-4 text-sm text-zg-secondary">
@@ -246,9 +228,7 @@ const ProductDetails = () => {
                                     </div>
                                     <div className="text-right">
                                         <div className="text-3xl font-bold text-zg-accent">₹{getCurrentPrice()}</div>
-                                        {product.type === 'frame' && selectedSize && (
-                                            <div className="text-sm text-zg-secondary line-through">₹{Math.round(getCurrentPrice() * 1.2)}</div>
-                                        )}
+
                                     </div>
                                 </div>
 
@@ -257,112 +237,30 @@ const ProductDetails = () => {
                                 </p>
 
                                 {/* Selectors */}
-                                {product.type === 'frame' &&
-                                    <div className="space-y-6 p-6 bg-zg-surface/30 rounded-2xl border border-zg-secondary/10 mb-8">
-                                        {product.type === 'frame' && product.frameSizes?.length > 0 && (
-                                            <div>
-                                                <label className="text-sm font-bold text-zg-primary mb-3 block uppercase tracking-wider">Select Size</label>
-                                                <div className="flex flex-wrap gap-3">
-                                                    {product.frameSizes.map((size, index) => (
-                                                        <button
-                                                            key={index}
-                                                            onClick={() => setSelectedSize(size)}
-                                                            disabled={!size.inStock}
-                                                            className={`px-4 py-2 rounded-lg border transition-all text-sm font-medium ${selectedSize?.name === size.name
-                                                                ? 'border-zg-accent bg-zg-accent text-black shadow-lg shadow-zg-accent/20'
-                                                                : 'border-zg-secondary/20 hover:border-zg-secondary/50 bg-zg-bg/50'
-                                                                } ${!size.inStock ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                                        >
-                                                            {size.name}
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {product.type === 'ealbum' && product.formats?.length > 0 && (
-                                            <div>
-                                                <label className="text-sm font-bold text-zg-primary mb-3 block uppercase tracking-wider">Select Format</label>
-                                                <div className="flex flex-wrap gap-3">
-                                                    {product.formats.map((format) => (
-                                                        <button
-                                                            key={format}
-                                                            onClick={() => setSelectedFormat(format)}
-                                                            className={`px-4 py-2 rounded-lg border transition-all text-sm font-medium ${selectedFormat === format
-                                                                ? 'border-zg-accent bg-zg-accent text-black shadow-lg shadow-zg-accent/20'
-                                                                : 'border-zg-secondary/20 hover:border-zg-secondary/50 bg-zg-bg/50'
-                                                                }`}
-                                                        >
-                                                            {format}
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
-
-                                        {/* Quantity */}
-                                        {product.type === 'frame' && (
-                                            <div>
-                                                <label className="text-sm font-bold text-zg-primary mb-3 block uppercase tracking-wider">Quantity</label>
-                                                <div className="flex items-center gap-4 bg-zg-bg/50 inline-flex rounded-xl p-1 border border-zg-secondary/10">
-                                                    <button
-                                                        onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                                                        className="w-10 h-10 rounded-lg hover:bg-zg-surface transition-colors flex items-center justify-center"
-                                                    >
-                                                        -
-                                                    </button>
-                                                    <span className="text-lg font-bold w-8 text-center">{quantity}</span>
-                                                    <button
-                                                        onClick={() => setQuantity(Math.min(product.stock, quantity + 1))}
-                                                        className="w-10 h-10 rounded-lg hover:bg-zg-surface transition-colors flex items-center justify-center"
-                                                    >
-                                                        +
-                                                    </button>
-                                                </div>
-                                            </div>
-                                        )}
+                                {product.type === 'ealbum' && product.formats?.length > 0 && (
+                                    <div>
+                                        <label className="text-sm font-bold text-zg-primary mb-3 block uppercase tracking-wider">Select Format</label>
+                                        <div className="flex flex-wrap gap-3">
+                                            {product.formats.map((format) => (
+                                                <button
+                                                    key={format}
+                                                    onClick={() => setSelectedFormat(format)}
+                                                    className={`px-4 py-2 rounded-lg border transition-all text-sm font-medium ${selectedFormat === format
+                                                        ? 'border-zg-accent bg-zg-accent text-black shadow-lg shadow-zg-accent/20'
+                                                        : 'border-zg-secondary/20 hover:border-zg-secondary/50 bg-zg-bg/50'
+                                                        }`}
+                                                >
+                                                    {format}
+                                                </button>
+                                            ))}
+                                        </div>
                                     </div>
-                                }
+                                )}
+
 
                                 {/* Customization Actions */}
                                 <div className="space-y-4 mb-8">
-                                    {product.customization?.allowed && product.type === 'frame' && (
-                                        <div className="bg-zg-surface/30 border border-zg-secondary/10 rounded-xl p-5">
-                                            <div className="flex items-center justify-between mb-4">
-                                                <h3 className="font-bold flex items-center gap-2">
-                                                    <Upload className="w-5 h-5 text-zg-accent" />
-                                                    Upload Photos
-                                                </h3>
-                                                <span className="text-xs text-zg-secondary bg-zg-bg px-2 py-1 rounded-full">
-                                                    {uploadedImages.length} / {product.customization.imageCount}
-                                                </span>
-                                            </div>
 
-                                            <div className="flex gap-3 overflow-x-auto pb-2 custom-scrollbar">
-                                                {uploadedImages.map((img, idx) => (
-                                                    <div key={idx} className="relative w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden group">
-                                                        <img src={img} className="w-full h-full object-cover" />
-                                                        <button
-                                                            onClick={() => removeUploadedImage(idx)}
-                                                            className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white"
-                                                        >
-                                                            <X className="w-4 h-4" />
-                                                        </button>
-                                                    </div>
-                                                ))}
-                                                {uploadedImages.length < product.customization.imageCount && (
-                                                    <label className="w-16 h-16 flex-shrink-0 border-2 border-dashed border-zg-secondary/30 rounded-lg flex items-center justify-center cursor-pointer hover:border-zg-accent hover:bg-zg-accent/5 transition">
-                                                        {uploading ? (
-                                                            <div className="animate-spin rounded-full h-4 w-4 border-2 border-zg-accent border-t-transparent"></div>
-                                                        ) : (
-                                                            <Upload className="w-5 h-5 text-zg-secondary" />
-                                                        )}
-                                                        <input type="file" accept="image/*" multiple className="hidden" onChange={handleImageUpload} disabled={uploading} />
-                                                    </label>
-                                                )}
-                                            </div>
-                                        </div>
-                                    )}
 
                                     {product.type === 'ealbum' && (
                                         <button
@@ -388,7 +286,7 @@ const ProductDetails = () => {
                                 <div className="flex gap-4">
                                     <button
                                         onClick={handleAddToCart}
-                                        disabled={addingToCart || (product.type === 'frame' && product.stock === 0)}
+                                        disabled={addingToCart}
                                         className="flex-1 py-4 bg-zg-accent text-black font-bold rounded-xl hover:bg-zg-accent/90 transition-all shadow-lg shadow-zg-accent/20 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-lg"
                                     >
                                         <ShoppingCart className="w-5 h-5" />
@@ -552,16 +450,18 @@ const ProductDetails = () => {
             </div>
 
             {/* Album Customizer Modal */}
-            {showCustomizer && product.type === 'ealbum' && (
-                <EAlbumCustomizer
-                    product={product}
-                    onSave={(customization) => {
-                        setEalbumCustomization(customization);
-                        setShowCustomizer(false);
-                    }}
-                    onClose={() => setShowCustomizer(false)}
-                />
-            )}
+            {
+                showCustomizer && product.type === 'ealbum' && (
+                    <EAlbumCustomizer
+                        product={product}
+                        onSave={(customization) => {
+                            setEalbumCustomization(customization);
+                            setShowCustomizer(false);
+                        }}
+                        onClose={() => setShowCustomizer(false)}
+                    />
+                )
+            }
         </>
     );
 };
