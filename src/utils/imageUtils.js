@@ -21,7 +21,7 @@ export const getImageUrl = (imagePath) => {
     }
 
     // In production, prepend the backend URL
-    const backendUrl = import.meta.env.VITE_API_URL || 'http://localhost:5007/api';
+    const backendUrl = import.meta.env.VITE_API_URL || 'https://mitoslearning.co.in/api';
     const baseUrl = backendUrl.replace('/api', ''); // Remove /api suffix
 
     // Ensure path starts with /
@@ -34,6 +34,6 @@ export const getImageUrl = (imagePath) => {
  * Get backend base URL for uploads
  */
 export const getBackendUrl = () => {
-    const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5007/api';
+    const apiUrl = import.meta.env.VITE_API_URL || 'https://mitoslearning.co.in/api';
     return apiUrl.replace('/api', '');
 };
